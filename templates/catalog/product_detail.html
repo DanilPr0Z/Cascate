@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Cascate Porte{% endblock %}
+
+{% block breadcrumbs_content %}
+    <span class="separator">></span>
+    <a href="{% url 'catalog:catalog' %}">Каталог</a>
+    <span class="separator">></span>
+    <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+    <span class="separator">></span>
+    <span>{{ product.name }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="product-page">
+    <div class="container">
+        <div class="product-detail">
+            <div class="product-images">
+                <div class="main-image-wrapper">
+                    {% with main_image=product.get_main_image %}
+                    {% if main_image %}
+                    <img src="{{ main_image.image.url }}" alt="{{ product.name }}" id="mainProductImage" class="main-product-image">
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                {% if product.images.count > 1 %}
+                <div class="product-thumbnails-list">
+                    {% for image in product.images.all %}
+                    <img src="{{ image.image.url }}" alt="{{ product.name }}" 
+                         class="thumbnail-image {% if image.is_main %}active{% endif %}"
+                         data-image="{{ image.image.url }}">
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="product-details">
+                <h1 class="product-title">{{ product.name }}</h1>
+                
+                <div class="product-price-large">
+                    {{ product.price|floatformat:0 }} ₽
+                </div>
+
+                {% if product.availability == 'in_stock' %}
+                <div class="product-availability-badge">
+                    <span class="availability-dot in-stock"></span>
+                    <span>В наличии</span>
+                </div>
+                {% endif %}
+
+                {% if product.country %}
+                <div class="product-spec">
+                    <strong>Страна:</strong> {{ product.country }}
+                </div>
+                {% endif %}
+
+                {% if product.materials %}
+                <div class="product-spec">
+                    <strong>Материалы:</strong> {{ product.materials }}
+                </div>
+                {% endif %}
+
+                {% if product.dimensions %}
+                <div class="product-spec">
+                    <strong>Размеры:</strong> {{ product.dimensions }}
+                </div>
+                {% endif %}
+
+                {% if product.product_number %}
+                <div class="product-spec">
+                    <strong>Номер товара:</strong> {{ product.product_number }}
+                </div>
+                {% endif %}
+
+                {% if product.description %}
+                <div class="product-description">
+                    <h3>Описание</h3>
+                    <p>{{ product.description|linebreaks }}</p>
+                </div>
+                {% endif %}
+
+                <div class="product-actions">
+                    <button class="btn-primary add-to-cart-btn">В КОРЗИНУ</button>
+                    <button class="btn-secondary favorite-btn">❤️ В избранное</button>
+                </div>
+            </div>
+        </div>
+
+        {% if related_products %}
+        <div class="related-products">
+            <h2>Похожие товары</h2>
+            <div class="products-grid">
+                {% for related_product in related_products %}
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        {% with main_image=related_product.get_main_image %}
+                        {% if main_image %}
+                        <img src="{{ main_image.image.url }}" alt="{{ related_product.name }}" class="product-image">
+                        {% endif %}
+                        {% endwith %}
+                        <div class="product-overlay">
+                            <div class="product-actions">
+                                <button class="product-action-btn favorite-btn">❤️</button>
+                                <button class="product-action-btn cart-btn">🛍️</button>
+                            </div>
+                        </div>
+                        <div class="product-availability">
+                            {% if related_product.availability == 'in_stock' %}
+                            <span class="availability-dot in-stock"></span>
+                            <span>В наличии</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">{{ related_product.name }}</h3>
+                        <p class="product-price">{{ related_product.price|floatformat:0 }} ₽</p>
+                    </div>
+                    <a href="{{ related_product.get_absolute_url }}" class="product-link"></a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/product_detail.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/product_detail.js' %}"></script>
+{% endblock %}
+

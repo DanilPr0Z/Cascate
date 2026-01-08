@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cascate Porte - Дизайнерская мебель{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <div class="top-nav">
+        <div class="container">
+            <div class="top-nav-left">
+                <a href="{% url 'catalog:catalog' %}">О компании</a>
+                <a href="#">Проекты</a>
+                <a href="#">Блог</a>
+                <a href="#">Дизайнеры</a>
+                <a href="#">Производители</a>
+                <a href="#">Отзывы</a>
+                <a href="#">Доставка и оплата</a>
+                <a href="#">Адреса салонов</a>
+            </div>
+            <div class="top-nav-right">
+                <span class="working-hours">с 10:00 до 20:00 ежедневно</span>
+                <a href="tel:+74950235717" class="phone">+7 (495) 023-57-17</a>
+                <a href="#" class="callback-link">Заказать обратный звонок</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <div class="main-nav">
+        <div class="container">
+            <div class="nav-left">
+                <a href="{% url 'catalog:catalog' %}" class="logo">
+                    <span class="logo-text">Cascate <span class="logo-accent">Porte</span></span>
+                </a>
+                <a href="{% url 'catalog:catalog' %}" class="catalog-btn">
+                    <svg class="hamburger" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                    Каталог
+                </a>
+            </div>
+            <div class="nav-center">
+                <div class="search-box">
+                    <input type="text" placeholder="Поиск товара" class="search-input">
+                    <button class="search-icon" type="button" title="Поиск">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                    <button class="camera-icon" type="button" title="Поиск по фото">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="nav-right">
+                <a href="#" class="nav-icon favorite-icon" title="Избранное">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </a>
+                <a href="#" class="nav-icon cart-icon" title="Корзина">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Navigation -->
+    <div class="secondary-nav">
+        <div class="container">
+            <a href="#">По типу помещения</a>
+            <a href="#">Светильники</a>
+            <a href="#">Уличная мебель</a>
+            <a href="#">Подарки</a>
+            <a href="#">Декор и аксессуары</a>
+            <a href="#">Кухни</a>
+            <a href="#">Подарочные сертификаты</a>
+            <a href="#">Товары в наличии</a>
+            <a href="#">Распродажа</a>
+        </div>
+    </div>
+
+    <!-- Breadcrumbs -->
+    {% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <div class="container">
+            <a href="{% url 'catalog:catalog' %}">Cascate Porte</a>
+            {% block breadcrumbs_content %}{% endblock %}
+        </div>
+    </div>
+    {% endblock %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <div class="chat-bubble">Напишите нам, мы онлайн!</div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scrollTop">↑</button>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

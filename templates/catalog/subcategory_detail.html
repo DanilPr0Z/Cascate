@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ subcategory.name }} - {{ category.name }} - Cascate Porte{% endblock %}
+
+{% block breadcrumbs_content %}
+    <span class="separator">></span>
+    <a href="{% url 'catalog:catalog' %}">Каталог</a>
+    <span class="separator">></span>
+    <a href="{{ category.get_absolute_url }}">{{ category.name }}</a>
+    <span class="separator">></span>
+    <span>{{ subcategory.name }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="category-page">
+    <div class="container">
+        <div class="category-header">
+            <h1 class="page-title">{{ subcategory.name }}</h1>
+            <p class="products-count">{{ products.count }} товаров</p>
+        </div>
+
+        <div class="category-content">
+            <!-- Filters Sidebar -->
+            <aside class="filters-sidebar">
+                <h3>Фильтры</h3>
+                
+                <!-- Availability Filters -->
+                <div class="filter-group">
+                    <h4>Наличие</h4>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="in_stock" 
+                               {% if availability_filter == 'in_stock' %}checked{% endif %}>
+                        <span>В наличии</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="on_the_way"
+                               {% if availability_filter == 'on_the_way' %}checked{% endif %}>
+                        <span>Товар в пути</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="new_2025"
+                               {% if availability_filter == 'new_2025' %}checked{% endif %}>
+                        <span>Новинка 2025 года</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="new_arrival"
+                               {% if availability_filter == 'new_arrival' %}checked{% endif %}>
+                        <span>Новое поступление</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="best_offer"
+                               {% if availability_filter == 'best_offer' %}checked{% endif %}>
+                        <span>Лучшее предложение</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="online_fitting"
+                               {% if availability_filter == 'online_fitting' %}checked{% endif %}>
+                        <span>Онлайн-примерка</span>
+                    </label>
+                </div>
+
+                <!-- Filter Categories -->
+                {% for filter_cat in filter_categories %}
+                <div class="filter-group">
+                    <h4>{{ filter_cat.name }}</h4>
+                    <div class="filter-values">
+                        {% for value in filter_cat.values.all %}
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filter" value="{{ value.slug }}"
+                                   {% if value.slug in current_filters %}checked{% endif %}>
+                            <span>{{ value.name }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </aside>
+
+            <!-- Products Grid -->
+            <div class="products-section">
+                <div class="products-toolbar">
+                    <select name="sort" id="sortSelect" class="sort-select">
+                        <option value="availability" {% if sort_by == 'availability' %}selected{% endif %}>По наличию</option>
+                        <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>По цене: от дешевых</option>
+                        <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>По цене: от дорогих</option>
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>По названию</option>
+                    </select>
+                </div>
+
+                <div class="products-grid">
+                    {% for product in products %}
+                    <div class="product-card" data-product-url="{{ product.get_absolute_url }}">
+                        <div class="product-image-wrapper">
+                            {% with main_image=product.get_main_image %}
+                            {% if main_image %}
+                            <img src="{{ main_image.image.url }}" alt="{{ product.name }}" class="product-image">
+                            {% else %}
+                            <div class="product-image-placeholder">Нет изображения</div>
+                            {% endif %}
+                            {% endwith %}
+                            
+                            {% if product.is_new %}
+                            <span class="product-badge new-badge">NEW</span>
+                            {% endif %}
+                            
+                            <div class="product-overlay">
+                                <div class="product-actions">
+                                    <button class="product-action-btn favorite-btn" title="В избранное">❤️</button>
+                                    <button class="product-action-btn cart-btn" title="В корзину">🛍️</button>
+                                </div>
+                                {% if product.images.count > 1 %}
+                                <div class="product-thumbnails">
+                                    {% for image in product.images.all|slice:":4" %}
+                                    <img src="{{ image.image.url }}" alt="{{ product.name }}" 
+                                         class="product-thumbnail" data-image="{{ image.image.url }}">
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="product-availability">
+                                {% if product.availability == 'in_stock' %}
+                                <span class="availability-dot in-stock"></span>
+                                <span>В наличии</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">{{ product.name }}</h3>
+                            <p class="product-price">{{ product.price|floatformat:0 }} ₽</p>
+                            <div class="product-details-hover">
+                                {% if product.country %}
+                                <p class="product-detail">Страна: {{ product.country }}</p>
+                                {% endif %}
+                                {% if product.materials %}
+                                <p class="product-detail">Материалы: {{ product.materials|truncatewords:10 }}</p>
+                                {% endif %}
+                                {% if product.dimensions %}
+                                <p class="product-detail">Размеры: {{ product.dimensions }}</p>
+                                {% endif %}
+                                {% if product.product_number %}
+                                <p class="product-detail">Номер товара: {{ product.product_number }}</p>
+                                {% endif %}
+                                <button class="btn-add-to-cart">В КОРЗИНУ</button>
+                            </div>
+                        </div>
+                        <a href="{{ product.get_absolute_url }}" class="product-link"></a>
+                    </div>
+                    {% empty %}
+                    <div class="no-products">
+                        <p>Товары не найдены</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/category_detail.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/category_detail.js' %}"></script>
+{% endblock %}
+

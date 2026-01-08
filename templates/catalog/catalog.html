@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Каталог мебели - Cascate Porte{% endblock %}
+
+{% block breadcrumbs_content %}
+    <span class="separator">></span>
+    <span>Каталог</span>
+{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+    <div class="container">
+        <h1 class="page-title">Каталог</h1>
+        <div class="categories-grid">
+            {% for category in categories %}
+            <div class="category-card" data-category-url="{{ category.get_absolute_url }}">
+                <div class="category-image-wrapper">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-image">
+                    {% else %}
+                    <div class="category-image-placeholder">Нет изображения</div>
+                    {% endif %}
+                    <div class="category-overlay">
+                        <div class="category-info">
+                            <h2 class="category-name">{{ category.name }}</h2>
+                            <p class="category-count">{{ category.products_count|default:0 }} товаров</p>
+                            {% if category.subcategories.exists %}
+                            <ul class="subcategories-list">
+                                {% for subcategory in category.subcategories.all|slice:":5" %}
+                                <li>
+                                    <a href="{{ subcategory.get_absolute_url }}" class="subcategory-link">
+                                        {{ subcategory.name }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="category-footer">
+                    <span class="category-title">{{ category.name }}</span>
+                    <span class="category-items-count">{{ category.products_count|default:0 }} товаров</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-categories">
+                <p>Категории пока не добавлены. Зайдите в админ-панель, чтобы добавить категории и товары.</p>
+                <a href="/admin/" class="btn-primary">Перейти в админ-панель</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/catalog.js' %}"></script>
+{% endblock %}
+

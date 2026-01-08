@@ -1,0 +1,408 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Cascate Porte цветовая схема - нейтральные элегантные оттенки */
+    --primary-color: #8B7355; /* Коричневый/бежевый */
+    --primary-color-hover: #6B5943; /* Темнее при наведении */
+    --secondary-color: #A08B6F; /* Светло-коричневый акцент */
+    --accent-color: #C4B5A0; /* Бежевый акцент */
+    --text-dark: #3A352D; /* Темно-коричневый для текста */
+    --text-light: #6B6357; /* Средний коричневый для вторичного текста */
+    --bg-light: #F5F3F0; /* Светло-бежевый фон */
+    --bg-top-nav: #FAF8F5; /* Почти белый с бежевым оттенком */
+    --border-color: #D4C8B8; /* Светло-коричневый для границ */
+    --white: #ffffff;
+    --shadow: 0 2px 8px rgba(59, 53, 45, 0.1);
+    --shadow-hover: 0 4px 16px rgba(59, 53, 45, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-dark);
+    line-height: 1.6;
+    background-color: var(--white);
+    font-weight: 300;
+}
+
+/* Элегантная типографика для заголовков */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-weight: 400;
+    color: var(--text-dark);
+    letter-spacing: 0.3px;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Top Navigation */
+.top-nav {
+    background-color: var(--bg-top-nav);
+    padding: 10px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.top-nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-nav-left {
+    display: flex;
+    gap: 20px;
+}
+
+.top-nav-left a {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.top-nav-left a:hover {
+    color: var(--primary-color);
+}
+
+.top-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.working-hours {
+    color: var(--text-light);
+}
+
+.phone {
+    color: var(--text-dark);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.callback-link {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* Main Navigation */
+.main-nav {
+    background-color: var(--white);
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.main-nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    text-decoration: none;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.logo-text {
+    color: var(--text-dark);
+    font-family: 'Georgia', serif;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.logo-text .logo-accent {
+    color: var(--primary-color);
+    font-weight: 400;
+    font-style: italic;
+}
+
+.catalog-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    transition: background-color 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.catalog-btn:hover {
+    background-color: var(--primary-color-hover);
+}
+
+.hamburger {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.nav-center {
+    flex: 1;
+    max-width: 600px;
+    margin: 0 30px;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-light);
+    border-radius: 6px;
+    padding: 10px 16px;
+    gap: 12px;
+    border: 1px solid transparent;
+}
+
+.search-box:focus-within {
+    border-color: var(--primary-color);
+    background-color: var(--white);
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+}
+
+.search-icon,
+.camera-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+}
+
+.search-icon svg,
+.camera-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.search-icon:hover,
+.camera-icon:hover {
+    opacity: 1;
+}
+
+.nav-right {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-icon {
+    font-size: 26px;
+    text-decoration: none;
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--text-dark);
+}
+
+.nav-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.nav-icon:hover {
+    transform: scale(1.15);
+    color: var(--primary-color);
+}
+
+.favorite-icon svg {
+    stroke: var(--text-dark);
+    fill: none;
+}
+
+.favorite-icon:hover svg {
+    stroke: var(--secondary-color);
+}
+
+.cart-icon svg {
+    stroke: var(--text-dark);
+    fill: none;
+}
+
+/* Secondary Navigation */
+.secondary-nav {
+    background-color: var(--white);
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.secondary-nav .container {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.secondary-nav a {
+    color: var(--text-dark);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
+    white-space: nowrap;
+    font-weight: 400;
+}
+
+.secondary-nav a:hover {
+    color: var(--primary-color);
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    background-color: var(--bg-light);
+    padding: 10px 0;
+    font-size: 14px;
+}
+
+.breadcrumbs a {
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+    color: var(--primary-color);
+}
+
+.separator {
+    margin: 0 8px;
+    color: var(--text-light);
+}
+
+/* Main Content */
+.main-content {
+    min-height: calc(100vh - 300px);
+    padding: 30px 0;
+}
+
+/* Chat Widget */
+.chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.chat-bubble {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-hover));
+    color: white;
+    padding: 16px 22px;
+    border-radius: 30px;
+    box-shadow: 0 4px 16px rgba(32, 178, 170, 0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.chat-bubble:hover {
+    transform: scale(1.05);
+}
+
+/* Scroll to Top */
+.scroll-top {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background-color: var(--bg-light);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 999;
+}
+
+.scroll-top.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.scroll-top:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #1a9a94;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-dark);
+    padding: 12px 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Page Title */
+.page-title {
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: var(--text-dark);
+    line-height: 1.2;
+}
+

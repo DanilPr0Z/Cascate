@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Cascate Porte{% endblock %}
+
+{% block breadcrumbs_content %}
+    <span class="separator">></span>
+    <a href="{% url 'catalog:catalog' %}">Каталог</a>
+    <span class="separator">></span>
+    <span>{{ category.name }}</span>
+    {% if subcategory %}
+    <span class="separator">></span>
+    <span>{{ subcategory.name }}</span>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="category-page">
+    <div class="container">
+        <div class="category-header">
+            <h1 class="page-title">{{ category.name }}</h1>
+            <p class="products-count">{{ products.count }} товаров</p>
+        </div>
+
+        <div class="category-content">
+            <!-- Filters Sidebar -->
+            <aside class="filters-sidebar">
+                <form method="get" id="filter-form">
+                    <!-- Сохраняем другие параметры фильтрации -->
+                    {% for filter in current_filters %}
+                    <input type="hidden" name="filter" value="{{ filter }}">
+                    {% endfor %}
+                    {% if availability_filter %}
+                    <input type="hidden" name="availability" value="{{ availability_filter }}">
+                    {% endif %}
+                    {% if search_query %}
+                    <input type="hidden" name="search" value="{{ search_query }}">
+                    {% endif %}
+                    {% if sort_by %}
+                    <input type="hidden" name="sort" value="{{ sort_by }}">
+                    {% endif %}
+                    
+                    <h3>Фильтры</h3>
+                    
+                    <!-- Subcategories Filter -->
+                    {% if subcategories %}
+                    <div class="filter-group">
+                        <h4>Подкатегории</h4>
+                        <div class="filter-values">
+                            <label class="radio-label">
+                                <input type="radio" name="subcategory" value="" 
+                                       {% if not selected_subcategory %}checked{% endif %}
+                                       onchange="this.form.submit()">
+                                <span>Все ({{ category.products.count }})</span>
+                            </label>
+                            {% for subcat in subcategories %}
+                            <label class="radio-label">
+                                <input type="radio" name="subcategory" value="{{ subcat.slug }}"
+                                       {% if selected_subcategory == subcat.slug %}checked{% endif %}
+                                       onchange="this.form.submit()">
+                                <span>{{ subcat.name }} ({{ subcat.products_count }})</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                
+                    <!-- Availability Filters -->
+                    <div class="filter-group">
+                        <h4>Наличие</h4>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="availability" value="in_stock" 
+                                   {% if availability_filter == 'in_stock' %}checked{% endif %}
+                                   onchange="this.form.submit()">
+                            <span>В наличии</span>
+                        </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="on_the_way"
+                               {% if availability_filter == 'on_the_way' %}checked{% endif %}
+                               onchange="this.form.submit()">
+                        <span>Товар в пути</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="new_2025"
+                               {% if availability_filter == 'new_2025' %}checked{% endif %}
+                               onchange="this.form.submit()">
+                        <span>Новинка 2025 года</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="new_arrival"
+                               {% if availability_filter == 'new_arrival' %}checked{% endif %}
+                               onchange="this.form.submit()">
+                        <span>Новое поступление</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="best_offer"
+                               {% if availability_filter == 'best_offer' %}checked{% endif %}
+                               onchange="this.form.submit()">
+                        <span>Лучшее предложение</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="availability" value="online_fitting"
+                               {% if availability_filter == 'online_fitting' %}checked{% endif %}
+                               onchange="this.form.submit()">
+                        <span>Онлайн-примерка</span>
+                    </label>
+                </div>
+
+                    <!-- Filter Categories -->
+                    {% for filter_slug, filter_data in filter_stats.items %}
+                    {% if filter_data.values %}
+                    <div class="filter-group">
+                        <h4>{{ filter_data.category.name }}</h4>
+                        <div class="filter-values">
+                            {% for item in filter_data.values %}
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="filter" value="{{ item.value.slug }}"
+                                       {% if item.is_active %}checked{% endif %}
+                                       onchange="this.form.submit()">
+                                <span>{{ item.value.name }} ({{ item.count }})</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </form>
+            </aside>
+
+            <!-- Products Grid -->
+            <div class="products-section">
+                <div class="products-toolbar">
+                    <form method="get" style="display: inline;">
+                        {% for filter in current_filters %}
+                        <input type="hidden" name="filter" value="{{ filter }}">
+                        {% endfor %}
+                        {% if selected_subcategory %}
+                        <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
+                        {% endif %}
+                        {% if availability_filter %}
+                        <input type="hidden" name="availability" value="{{ availability_filter }}">
+                        {% endif %}
+                        <select name="sort" id="sortSelect" class="sort-select" onchange="this.form.submit()">
+                            <option value="availability" {% if sort_by == 'availability' %}selected{% endif %}>По наличию</option>
+                            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>По цене: от дешевых</option>
+                            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>По цене: от дорогих</option>
+                            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>По названию</option>
+                        </select>
+                    </form>
+                </div>
+
+                <div class="products-grid">
+                    {% for product in products %}
+                    <div class="product-card" data-product-url="{{ product.get_absolute_url }}">
+                        <div class="product-image-wrapper">
+                            {% with main_image=product.get_main_image %}
+                            {% if main_image %}
+                            <img src="{{ main_image.image.url }}" alt="{{ product.name }}" class="product-image">
+                            {% else %}
+                            <div class="product-image-placeholder">Нет изображения</div>
+                            {% endif %}
+                            {% endwith %}
+                            
+                            {% if product.is_new %}
+                            <span class="product-badge new-badge">NEW</span>
+                            {% endif %}
+                            
+                            <div class="product-overlay">
+                                <div class="product-actions">
+                                    <button class="product-action-btn favorite-btn" title="В избранное">❤️</button>
+                                    <button class="product-action-btn cart-btn" title="В корзину">🛍️</button>
+                                </div>
+                                {% if product.images.count > 1 %}
+                                <div class="product-thumbnails">
+                                    {% for image in product.images.all|slice:":4" %}
+                                    <img src="{{ image.image.url }}" alt="{{ product.name }}" 
+                                         class="product-thumbnail" data-image="{{ image.image.url }}">
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="product-availability">
+                                {% if product.availability == 'in_stock' %}
+                                <span class="availability-dot in-stock"></span>
+                                <span>В наличии</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">{{ product.name }}</h3>
+                            <p class="product-price">{{ product.price|floatformat:0 }} ₽</p>
+                            <div class="product-details-hover">
+                                {% if product.country %}
+                                <p class="product-detail">Страна: {{ product.country }}</p>
+                                {% endif %}
+                                {% if product.materials %}
+                                <p class="product-detail">Материалы: {{ product.materials|truncatewords:10 }}</p>
+                                {% endif %}
+                                {% if product.dimensions %}
+                                <p class="product-detail">Размеры: {{ product.dimensions }}</p>
+                                {% endif %}
+                                {% if product.product_number %}
+                                <p class="product-detail">Номер товара: {{ product.product_number }}</p>
+                                {% endif %}
+                                <button class="btn-add-to-cart">В КОРЗИНУ</button>
+                            </div>
+                        </div>
+                        <a href="{{ product.get_absolute_url }}" class="product-link"></a>
+                    </div>
+                    {% empty %}
+                    <div class="no-products">
+                        <p>Товары не найдены</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/category_detail.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/category_detail.js' %}"></script>
+{% endblock %}
+

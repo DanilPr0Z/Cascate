@@ -1,0 +1,50 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-modern">
+    {% if app_list %}
+    <div class="dashboard-grid">
+        {% for app in app_list %}
+        <div class="dashboard-app">
+            <div class="app-header">
+                <h2 class="app-title">{{ app.name|upper }}</h2>
+            </div>
+            <div class="app-content">
+                <div class="app-models">
+                    {% for model in app.models %}
+                    <div class="model-item">
+                        <div class="model-info">
+                            <span class="model-name">{{ model.name }}</span>
+                        </div>
+                        <div class="model-actions">
+                            {% if model.add_url %}
+                            <a href="{{ model.add_url }}" class="action-btn add-btn" title="{% trans 'Add' %}">
+                                <span class="btn-icon">+</span>
+                                {% trans 'Add' %}
+                            </a>
+                            {% endif %}
+                            {% if model.admin_url %}
+                            <a href="{{ model.admin_url }}" class="action-btn edit-btn" title="{% trans 'Change' %}">
+                                <span class="btn-icon">✏️</span>
+                                {% trans 'Change' %}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">{% trans "You don't have permission to view or edit anything." %}</p>
+    {% endif %}
+</div>
+{% endblock %}
