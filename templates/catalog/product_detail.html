@@ -8,6 +8,10 @@
     <a href="{% url 'catalog:catalog' %}">Каталог</a>
     <span class="separator">></span>
     <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+    {% if product.subcategory %}
+    <span class="separator">></span>
+    <a href="{{ product.subcategory.get_absolute_url }}">{{ product.subcategory.name }}</a>
+    {% endif %}
     <span class="separator">></span>
     <span>{{ product.name }}</span>
 {% endblock %}
@@ -15,113 +19,160 @@
 {% block content %}
 <div class="product-page">
     <div class="container">
-        <div class="product-detail">
-            <div class="product-images">
-                <div class="main-image-wrapper">
+        <div class="product-detail-layout">
+            <!-- Left Column: Images -->
+            <div class="product-images-section">
+                <!-- Badge -->
+                {% if product.availability != 'in_stock' or product.is_new %}
+                <div class="product-badge">
+                    {% if product.is_new %}
+                        Новинка
+                    {% else %}
+                        {{ product.get_availability_display }}
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Main Image -->
+                <div class="main-image-container">
                     {% with main_image=product.get_main_image %}
                     {% if main_image %}
                     <img src="{{ main_image.image.url }}" alt="{{ product.name }}" id="mainProductImage" class="main-product-image">
+                    {% else %}
+                    <div class="no-image-placeholder">Нет изображения</div>
                     {% endif %}
                     {% endwith %}
                 </div>
+
+                <!-- Thumbnails -->
                 {% if product.images.count > 1 %}
-                <div class="product-thumbnails-list">
+                <div class="product-thumbnails">
                     {% for image in product.images.all %}
-                    <img src="{{ image.image.url }}" alt="{{ product.name }}" 
-                         class="thumbnail-image {% if image.is_main %}active{% endif %}"
-                         data-image="{{ image.image.url }}">
+                    <div class="thumbnail-wrapper {% if image.is_main %}active{% endif %}" data-image="{{ image.image.url }}">
+                        <img src="{{ image.image.url }}" alt="{{ product.name }}" class="thumbnail-image">
+                    </div>
                     {% endfor %}
                 </div>
                 {% endif %}
+
+                <!-- About Product Section -->
+                <div class="about-product-section">
+                    <h2 class="about-title">О товаре</h2>
+                    {% if product.description %}
+                    <div class="product-description-text">
+                        {{ product.description|linebreaks }}
+                    </div>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="product-details">
+            <!-- Right Column: Product Info -->
+            <div class="product-info-section">
                 <h1 class="product-title">{{ product.name }}</h1>
-                
-                <div class="product-price-large">
-                    {{ product.price|floatformat:0 }} ₽
+
+                <!-- Rating placeholder -->
+                <div class="product-rating">
+                    <div class="stars">
+                        <span class="star empty">★</span>
+                        <span class="star empty">★</span>
+                        <span class="star empty">★</span>
+                        <span class="star empty">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                    <span class="rating-text">Ваша оценка будет первой!</span>
                 </div>
 
-                {% if product.availability == 'in_stock' %}
-                <div class="product-availability-badge">
-                    <span class="availability-dot in-stock"></span>
-                    <span>В наличии</span>
-                </div>
-                {% endif %}
-
-                {% if product.country %}
-                <div class="product-spec">
-                    <strong>Страна:</strong> {{ product.country }}
-                </div>
-                {% endif %}
-
-                {% if product.materials %}
-                <div class="product-spec">
-                    <strong>Материалы:</strong> {{ product.materials }}
-                </div>
-                {% endif %}
-
-                {% if product.dimensions %}
-                <div class="product-spec">
-                    <strong>Размеры:</strong> {{ product.dimensions }}
-                </div>
-                {% endif %}
-
+                <!-- Product Number -->
                 {% if product.product_number %}
-                <div class="product-spec">
-                    <strong>Номер товара:</strong> {{ product.product_number }}
+                <div class="product-number">
+                    Номер товара: {{ product.product_number }}
                 </div>
                 {% endif %}
 
-                {% if product.description %}
-                <div class="product-description">
-                    <h3>Описание</h3>
-                    <p>{{ product.description|linebreaks }}</p>
+                <!-- Price -->
+                <div class="product-price-block">
+                    <span class="product-price">{{ product.price|floatformat:0|stringformat:"d" }} ₽</span>
                 </div>
-                {% endif %}
 
-                <div class="product-actions">
-                    <button class="btn-primary add-to-cart-btn">В КОРЗИНУ</button>
-                    <button class="btn-secondary favorite-btn">❤️ В избранное</button>
+                <!-- Add to Cart Button -->
+                <button class="btn-add-to-cart">ДОБАВИТЬ В КОРЗИНУ</button>
+
+                <!-- View in Showroom Button -->
+                <button class="btn-view-showroom">ПОСМОТРЕТЬ В САЛОНЕ</button>
+
+                <!-- Availability -->
+                <div class="availability-section">
+                    <div class="availability-header">
+                        <span class="availability-dot {% if product.availability == 'in_stock' %}in-stock{% endif %}"></span>
+                        <strong>В наличии:</strong>
+                    </div>
+                    <div class="availability-locations">
+                        <a href="#" class="location-link">ТРИО на Бережковской ></a>
+                        <a href="#" class="location-link">ТРИО на Кутузовском 8 ></a>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        {% if related_products %}
-        <div class="related-products">
-            <h2>Похожие товары</h2>
-            <div class="products-grid">
-                {% for related_product in related_products %}
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        {% with main_image=related_product.get_main_image %}
-                        {% if main_image %}
-                        <img src="{{ main_image.image.url }}" alt="{{ related_product.name }}" class="product-image">
-                        {% endif %}
-                        {% endwith %}
-                        <div class="product-overlay">
-                            <div class="product-actions">
-                                <button class="product-action-btn favorite-btn">❤️</button>
-                                <button class="product-action-btn cart-btn">🛍️</button>
-                            </div>
+                <!-- Other Variants -->
+                <div class="other-variants-section">
+                    <h3 class="variants-title">Другие варианты</h3>
+                    <div class="variants-slider">
+                        <!-- Placeholder for variants -->
+                    </div>
+                </div>
+
+                <!-- Collapsible Sections -->
+                <div class="collapsible-sections">
+                    <!-- Payment Methods -->
+                    <div class="collapsible-item">
+                        <div class="collapsible-header">
+                            <span>СПОСОБЫ ОПЛАТЫ</span>
+                            <span class="toggle-icon">+</span>
                         </div>
-                        <div class="product-availability">
-                            {% if related_product.availability == 'in_stock' %}
-                            <span class="availability-dot in-stock"></span>
-                            <span>В наличии</span>
-                            {% endif %}
+                        <div class="collapsible-content">
+                            <p>Наличные, банковские карты, безналичный расчет</p>
                         </div>
                     </div>
-                    <div class="product-info">
-                        <h3 class="product-name">{{ related_product.name }}</h3>
-                        <p class="product-price">{{ related_product.price|floatformat:0 }} ₽</p>
+
+                    <!-- Delivery Info -->
+                    <div class="collapsible-item">
+                        <div class="collapsible-header">
+                            <span>ИНФОРМАЦИЯ О ДОСТАВКЕ</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="collapsible-content">
+                            <p>Доставка по Москве и Московской области</p>
+                        </div>
                     </div>
-                    <a href="{{ related_product.get_absolute_url }}" class="product-link"></a>
                 </div>
-                {% endfor %}
+
+                <!-- Product Specifications -->
+                <div class="product-specifications">
+                    {% if product.country %}
+                    <div class="spec-row">
+                        <span class="spec-label">Страна, стиль:</span>
+                        <span class="spec-value">{{ product.country }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if product.materials %}
+                    <div class="spec-row">
+                        <span class="spec-label">Материалы:</span>
+                        <span class="spec-value">{{ product.materials }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if product.dimensions %}
+                    <div class="spec-row">
+                        <span class="spec-label">Размеры:</span>
+                        <span class="spec-value">{{ product.dimensions }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Clarify Details Button -->
+                <button class="btn-clarify-details">Уточнить детали</button>
             </div>
         </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -133,4 +184,3 @@
 {% block extra_js %}
 <script src="{% static 'js/product_detail.js' %}"></script>
 {% endblock %}
-
