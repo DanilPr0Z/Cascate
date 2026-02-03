@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import Category, SubCategory, Product, ProductImage, FilterCategory, FilterValue
+from .models import Category, SubCategory, Product, ProductImage, FilterCategory, FilterValue, Store, ProductStock
 
 
 @admin.register(Category)
@@ -85,12 +85,19 @@ class ProductImageInline(admin.TabularInline):
     extra = 1
     fields = ['image', 'image_preview', 'is_main', 'order', 'alt_text']
     readonly_fields = ['image_preview']
-    
+
     def image_preview(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;" />', obj.image.url)
         return "Нет изображения"
     image_preview.short_description = "Превью"
+
+
+class ProductStockInline(admin.TabularInline):
+    model = ProductStock
+    extra = 1
+    fields = ['store', 'quantity']
+    autocomplete_fields = ['store']
 
 
 @admin.register(Product)
@@ -100,7 +107,7 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name', 'product_number', 'description']
     filter_horizontal = ['filter_values']
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, ProductStockInline]
     list_per_page = 25
     list_display_links = ['name']
     date_hierarchy = 'created_at'

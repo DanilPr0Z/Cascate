@@ -12,3 +12,6 @@ class CatalogConfig(AppConfig):
         admin.site.site_title = "Cascate Porte"
         admin.site.index_title = "Панель управления каталогом"
 
+        # Import signals
+        import catalog.signals
+
