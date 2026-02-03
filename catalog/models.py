@@ -138,7 +138,10 @@ class Product(models.Model):
     # Описание
     description = models.TextField(blank=True, verbose_name="Описание")
     short_description = models.CharField(max_length=500, blank=True, verbose_name="Краткое описание")
-    
+
+    # QR код
+    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True, verbose_name="QR код")
+
     # Метаданные
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -197,4 +200,41 @@ class ProductImage(models.Model):
         if self.is_main:
             ProductImage.objects.filter(product=self.product, is_main=True).exclude(id=self.id).update(is_main=False)
         super().save(*args, **kwargs)
+
+
+class Store(models.Model):
+    """Магазин/Салон"""
+    name = models.CharField(max_length=200, verbose_name="Название магазина")
+    address = models.CharField(max_length=500, verbose_name="Адрес")
+    phone = models.CharField(max_length=50, blank=True, verbose_name="Телефон")
+    email = models.EmailField(blank=True, verbose_name="Email")
+    working_hours = models.CharField(max_length=200, blank=True, verbose_name="Часы работы")
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Магазин"
+        verbose_name_plural = "Магазины"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class ProductStock(models.Model):
+    """Наличие товара в магазине"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='stock', verbose_name="Товар")
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='stock', verbose_name="Магазин")
+    quantity = models.PositiveIntegerField(default=0, verbose_name="Количество")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Остаток товара"
+        verbose_name_plural = "Остатки товаров"
+        unique_together = ['product', 'store']
+        ordering = ['store', 'product']
+
+    def __str__(self):
+        return f"{self.product.name} - {self.store.name}: {self.quantity} шт."
 

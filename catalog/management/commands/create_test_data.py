@@ -1,3 +1,4 @@
+
 from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
 from django.utils.text import slugify

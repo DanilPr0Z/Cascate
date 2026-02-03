@@ -168,7 +168,7 @@
                             <div class="product-overlay">
                                 <div class="product-actions">
                                     <button class="product-action-btn favorite-btn" title="В избранное">❤️</button>
-                                    <button class="product-action-btn cart-btn" title="В корзину">🛍️</button>
+                                    <button class="product-action-btn cart-btn add-to-cart-btn" data-product-id="{{ product.id }}" title="В корзину">🛍️</button>
                                 </div>
                                 {% if product.images.count > 1 %}
                                 <div class="product-thumbnails">
@@ -203,7 +203,7 @@
                                 {% if product.product_number %}
                                 <p class="product-detail">Номер товара: {{ product.product_number }}</p>
                                 {% endif %}
-                                <button class="btn-add-to-cart">В КОРЗИНУ</button>
+                                <button class="btn-add-to-cart" data-product-id="{{ product.id }}">В КОРЗИНУ</button>
                             </div>
                         </div>
                         <a href="{{ product.get_absolute_url }}" class="product-link"></a>
@@ -225,6 +225,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/cart.js' %}"></script>
 <script src="{% static 'js/category_detail.js' %}"></script>
 {% endblock %}
 

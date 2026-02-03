@@ -73,8 +73,10 @@ document.addEventListener('DOMContentLoaded', function() {
             addToCartBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                // TODO: Add to cart functionality
-                alert('Товар добавлен в корзину!');
+                const productId = this.dataset.productId;
+                if (productId && typeof addToCart === 'function') {
+                    addToCart(productId, this);
+                }
             });
         }
         

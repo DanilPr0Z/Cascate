@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль - Cascate Porte{% endblock %}
+
+{% block breadcrumbs_content %}
+    <span class="separator">></span>
+    <span>Профиль</span>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h1 class="profile-title">Мой профиль</h1>
+        <a href="{% url 'accounts:logout' %}" class="btn-logout">Выйти</a>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="profile-content">
+        <div class="profile-section">
+            <h2 class="section-title">Личная информация</h2>
+            <div class="profile-info">
+                <div class="info-row">
+                    <span class="info-label">Имя пользователя:</span>
+                    <span class="info-value">{{ user.username }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ user.email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Имя:</span>
+                    <span class="info-value">{{ user.first_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Фамилия:</span>
+                    <span class="info-value">{{ user.last_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Дата регистрации:</span>
+                    <span class="info-value">{{ user.date_joined|date:"d.m.Y" }}</span>
+                </div>
+            </div>
+            <button class="btn-secondary">Редактировать профиль</button>
+        </div>
+
+        <div class="profile-section">
+            <h2 class="section-title">Быстрые действия</h2>
+            <div class="profile-actions">
+                <a href="{% url 'cart:cart' %}" class="action-card">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <h3>Корзина</h3>
+                    <p>Просмотреть товары в корзине</p>
+                </a>
+                <a href="{% url 'catalog:catalog' %}" class="action-card">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <h3>Каталог</h3>
+                    <p>Перейти к покупкам</p>
+                </a>
+                <a href="#" class="action-card">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <h3>Избранное</h3>
+                    <p>Мои любимые товары</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h2 class="section-title">История заказов</h2>
+            <div class="orders-empty">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+                <p>У вас пока нет заказов</p>
+                <a href="{% url 'catalog:catalog' %}" class="btn-primary">Начать покупки</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

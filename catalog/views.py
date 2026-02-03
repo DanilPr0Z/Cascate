@@ -151,16 +151,25 @@ def subcategory_detail(request, category_slug, subcategory_slug):
 def product_detail(request, slug):
     """Детальная страница товара"""
     product = get_object_or_404(Product.objects.prefetch_related('images', 'filter_values'), slug=slug)
-    
+
     # Увеличиваем счетчик просмотров
     product.views_count += 1
     product.save(update_fields=['views_count'])
-    
-    # Похожие товары
-    related_products = Product.objects.filter(
-        category=product.category
-    ).exclude(id=product.id)[:4]
-    
+
+    # Похожие товары - сначала пытаемся найти из той же подкатегории
+    related_products = None
+    if product.subcategory:
+        # Если есть подкатегория, берем товары из нее
+        related_products = Product.objects.filter(
+            subcategory=product.subcategory
+        ).exclude(id=product.id)[:4]
+
+    # Если нет подкатегории или нашлось мало товаров, берем из категории
+    if not related_products or related_products.count() < 4:
+        related_products = Product.objects.filter(
+            category=product.category
+        ).exclude(id=product.id)[:4]
+
     context = {
         'product': product,
         'related_products': related_products,

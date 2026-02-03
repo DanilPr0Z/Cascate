@@ -252,9 +252,35 @@ h1, h2, h3, h4, h5, h6 {
     stroke: var(--secondary-color);
 }
 
+.cart-icon {
+    position: relative;
+}
+
 .cart-icon svg {
     stroke: var(--text-dark);
     fill: none;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+}
+
+/* Secondary Navigation Wrapper */
+.secondary-nav-wrapper {
+    position: relative;
 }
 
 /* Secondary Navigation */
@@ -278,10 +304,53 @@ h1, h2, h3, h4, h5, h6 {
     transition: color 0.3s;
     white-space: nowrap;
     font-weight: 400;
+    position: relative;
 }
 
 .secondary-nav a:hover {
     color: var(--primary-color);
+}
+
+/* Category Submenus */
+.category-submenu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: var(--white);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-hover);
+    display: none;
+    z-index: 85;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.category-submenu.active {
+    display: block;
+}
+
+.submenu-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px 20px;
+    padding: 20px;
+}
+
+.submenu-item {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.3s;
+    display: block;
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+
+.submenu-item:hover {
+    color: var(--primary-color);
+    background-color: var(--bg-light);
+    padding-left: 16px;
 }
 
 /* Breadcrumbs */
@@ -404,5 +473,174 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 30px;
     color: var(--text-dark);
     line-height: 1.2;
+}
+
+/* Main Catalog Mega Menu */
+.catalog-mega-menu {
+    position: fixed;
+    top: 162px; /* Adjusted for header height */
+    left: 0;
+    right: 0;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-hover);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px);
+    transition: all 0.4s ease;
+    z-index: 90;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.catalog-mega-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.catalog-btn:hover ~ .catalog-mega-menu,
+.catalog-btn:focus ~ .catalog-mega-menu,
+.catalog-mega-menu:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.mega-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 40px;
+    padding: 40px 20px;
+}
+
+.mega-menu-section {
+    padding: 0;
+}
+
+.mega-menu-section-wide {
+    grid-column: span 2;
+}
+
+.mega-menu-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 8px;
+}
+
+.mega-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mega-menu-list li {
+    margin-bottom: 10px;
+}
+
+.mega-menu-list li a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.3s;
+    display: inline-block;
+    padding: 2px 0;
+}
+
+.mega-menu-list li a:hover {
+    color: var(--primary-color);
+    padding-left: 8px;
+}
+
+/* Subsections for Furniture */
+.mega-menu-subsections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.mega-menu-subsection h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.mega-menu-sublist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mega-menu-sublist li {
+    margin-bottom: 8px;
+}
+
+.mega-menu-sublist li a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.3s;
+    display: inline-block;
+}
+
+.mega-menu-sublist li a:hover {
+    color: var(--primary-color);
+    padding-left: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .mega-menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mega-menu-section-wide {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .mega-menu-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .catalog-mega-menu {
+        max-height: 60vh;
+    }
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification-success {
+    border-left: 4px solid #28a745;
+}
+
+.notification-error {
+    border-left: 4px solid #dc3545;
 }
 

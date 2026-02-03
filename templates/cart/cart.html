@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Корзина - Cascate Porte{% endblock %}
+
+{% block breadcrumbs_content %}
+    <span class="separator">></span>
+    <span>Корзина</span>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <h1 class="page-title">Корзина покупок</h1>
+
+    {% if cart_items %}
+    <div class="cart-content">
+        <div class="cart-main">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Цена</th>
+                        <th>Количество</th>
+                        <th>Сумма</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr id="cart-item-{{ item.id }}">
+                        <td class="cart-product-info">
+                            <div class="product-info-wrapper">
+                                {% with main_image=item.product.get_main_image %}
+                                {% if main_image %}
+                                <img src="{{ main_image.image.url }}" alt="{{ item.product.name }}" class="cart-product-image">
+                                {% else %}
+                                <div class="cart-product-image-placeholder">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+                                <div class="product-details">
+                                    <a href="{{ item.product.get_absolute_url }}" class="product-name">{{ item.product.name }}</a>
+                                    {% if item.product.product_number %}
+                                    <span class="product-number">Артикул: {{ item.product.product_number }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="cart-product-price">
+                            {{ item.product.price|floatformat:0 }} ₽
+                        </td>
+                        <td class="cart-product-quantity">
+                            <div class="quantity-control">
+                                <button type="button" class="qty-btn qty-minus" data-item-id="{{ item.id }}">−</button>
+                                <input type="number" class="qty-input" value="{{ item.quantity }}" min="1" readonly>
+                                <button type="button" class="qty-btn qty-plus" data-item-id="{{ item.id }}">+</button>
+                            </div>
+                        </td>
+                        <td class="cart-product-total">
+                            <span id="item-total-{{ item.id }}" class="item-total">{{ item.get_total_price|floatformat:0 }} ₽</span>
+                        </td>
+                        <td class="cart-product-remove">
+                            <button type="button" class="btn-remove-item" data-item-id="{{ item.id }}" title="Удалить">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="cart-actions">
+                <a href="{% url 'catalog:catalog' %}" class="btn-continue-shopping">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Продолжить покупки
+                </a>
+            </div>
+        </div>
+
+        <div class="cart-sidebar">
+            <div class="cart-summary">
+                <h2 class="summary-title">Итого</h2>
+
+                <div class="summary-row">
+                    <span>Товаров:</span>
+                    <span>{{ cart.get_total_items }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Сумма:</span>
+                    <span class="cart-total-price">{{ total_price|floatformat:0 }} ₽</span>
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-row summary-total">
+                    <span>Итого к оплате:</span>
+                    <span class="cart-total-price">{{ total_price|floatformat:0 }} ₽</span>
+                </div>
+
+                <button class="btn-checkout" disabled title="Оформление заказов будет добавлено позже">
+                    Оформить заказ
+                </button>
+
+                <div class="summary-note">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Оформление заказов скоро будет доступно</span>
+                </div>
+            </div>
+
+            <div class="cart-benefits">
+                <h3 class="benefits-title">Преимущества покупки</h3>
+                <ul class="benefits-list">
+                    <li>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Бесплатная доставка</span>
+                    </li>
+                    <li>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Гарантия качества</span>
+                    </li>
+                    <li>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Возврат в течение 14 дней</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="cart-empty">
+        <div class="empty-icon">
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+        </div>
+        <h2>Ваша корзина пуста</h2>
+        <p>Добавьте товары из каталога, чтобы совершить покупку</p>
+        <a href="{% url 'catalog:catalog' %}" class="btn-primary">Перейти в каталог</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cart.js' %}"></script>
+{% endblock %}

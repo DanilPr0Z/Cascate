@@ -69,31 +69,53 @@
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                     </svg>
                 </a>
-                <a href="#" class="nav-icon cart-icon" title="Корзина">
+                <a href="{% url 'cart:cart' %}" class="nav-icon cart-icon" title="Корзина">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
                         <path d="M16 10a4 4 0 0 1-8 0"></path>
                     </svg>
+                    {% if cart_count > 0 %}
+                    <span class="cart-badge">{{ cart_count }}</span>
+                    {% endif %}
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Secondary Navigation -->
-    <div class="secondary-nav">
-        <div class="container">
-            <a href="#">По типу помещения</a>
-            <a href="#">Светильники</a>
-            <a href="#">Уличная мебель</a>
-            <a href="#">Подарки</a>
-            <a href="#">Декор и аксессуары</a>
-            <a href="#">Кухни</a>
-            <a href="#">Подарочные сертификаты</a>
-            <a href="#">Товары в наличии</a>
-            <a href="#">Распродажа</a>
+    <!-- Secondary Navigation Wrapper -->
+    <div class="secondary-nav-wrapper">
+        <!-- Secondary Navigation -->
+        <div class="secondary-nav">
+            <div class="container">
+                {% for category in all_categories %}
+                <a href="{% url 'catalog:category_detail' category.slug %}" class="category-nav-link" data-category-slug="{{ category.slug }}">
+                    {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
         </div>
+
+        <!-- Category Submenus -->
+        {% for category in all_categories %}
+        {% with subcats=category.subcategories.all %}
+        {% if subcats %}
+        <div class="category-submenu" id="submenu-{{ category.slug }}" data-category="{{ category.slug }}">
+            <div class="container">
+                <div class="submenu-content">
+                    {% for subcategory in subcats %}
+                    <a href="{% url 'catalog:subcategory_detail' category.slug subcategory.slug %}" class="submenu-item">
+                        {{ subcategory.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% endfor %}
     </div>
+
 
     <!-- Breadcrumbs -->
     {% block breadcrumbs %}
