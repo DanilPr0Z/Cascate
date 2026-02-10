@@ -21,71 +21,23 @@
         </div>
 
         <div class="category-content">
-            <!-- Filters Sidebar -->
-            <aside class="filters-sidebar">
-                <h3>Фильтры</h3>
-                
-                <!-- Availability Filters -->
-                <div class="filter-group">
-                    <h4>Наличие</h4>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="in_stock" 
-                               {% if availability_filter == 'in_stock' %}checked{% endif %}>
-                        <span>В наличии</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="on_the_way"
-                               {% if availability_filter == 'on_the_way' %}checked{% endif %}>
-                        <span>Товар в пути</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="new_2025"
-                               {% if availability_filter == 'new_2025' %}checked{% endif %}>
-                        <span>Новинка 2025 года</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="new_arrival"
-                               {% if availability_filter == 'new_arrival' %}checked{% endif %}>
-                        <span>Новое поступление</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="best_offer"
-                               {% if availability_filter == 'best_offer' %}checked{% endif %}>
-                        <span>Лучшее предложение</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="online_fitting"
-                               {% if availability_filter == 'online_fitting' %}checked{% endif %}>
-                        <span>Онлайн-примерка</span>
-                    </label>
-                </div>
-
-                <!-- Filter Categories -->
-                {% for filter_cat in filter_categories %}
-                <div class="filter-group">
-                    <h4>{{ filter_cat.name }}</h4>
-                    <div class="filter-values">
-                        {% for value in filter_cat.values.all %}
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="filter" value="{{ value.slug }}"
-                                   {% if value.slug in current_filters %}checked{% endif %}>
-                            <span>{{ value.name }}</span>
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endfor %}
-            </aside>
-
             <!-- Products Grid -->
             <div class="products-section">
                 <div class="products-toolbar">
-                    <select name="sort" id="sortSelect" class="sort-select">
-                        <option value="availability" {% if sort_by == 'availability' %}selected{% endif %}>По наличию</option>
-                        <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>По цене: от дешевых</option>
-                        <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>По цене: от дорогих</option>
-                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>По названию</option>
-                    </select>
+                    <form method="get" style="display: inline;">
+                        {% for filter in current_filters %}
+                        <input type="hidden" name="filter" value="{{ filter }}">
+                        {% endfor %}
+                        {% if availability_filter %}
+                        <input type="hidden" name="availability" value="{{ availability_filter }}">
+                        {% endif %}
+                        <select name="sort" id="sortSelect" class="sort-select" onchange="this.form.submit()">
+                            <option value="availability" {% if sort_by == 'availability' %}selected{% endif %}>По наличию</option>
+                            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>По цене: от дешевых</option>
+                            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>По цене: от дорогих</option>
+                            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>По названию</option>
+                        </select>
+                    </form>
                 </div>
 
                 <div class="products-grid">
@@ -105,10 +57,6 @@
                             {% endif %}
                             
                             <div class="product-overlay">
-                                <div class="product-actions">
-                                    <button class="product-action-btn favorite-btn" title="В избранное">❤️</button>
-                                    <button class="product-action-btn cart-btn add-to-cart-btn" data-product-id="{{ product.id }}" title="В корзину">🛍️</button>
-                                </div>
                                 {% if product.images.count > 1 %}
                                 <div class="product-thumbnails">
                                     {% for image in product.images.all|slice:":4" %}
@@ -138,9 +86,6 @@
                                 {% endif %}
                                 {% if product.dimensions %}
                                 <p class="product-detail">Размеры: {{ product.dimensions }}</p>
-                                {% endif %}
-                                {% if product.product_number %}
-                                <p class="product-detail">Номер товара: {{ product.product_number }}</p>
                                 {% endif %}
                                 <button class="btn-add-to-cart" data-product-id="{{ product.id }}">В КОРЗИНУ</button>
                             </div>

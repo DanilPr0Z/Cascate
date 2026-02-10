@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cron',  # Периодические задачи
     'catalog',
     'accounts',
     'cart',
@@ -135,3 +136,14 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/catalog/'
 LOGOUT_REDIRECT_URL = '/'
 
+
+# Django Cron settings
+CRON_CLASSES = [
+    'catalog.cron.SyncGoogleSheetsCronJob',
+]
+
+# Настройка логирования cron задач
+import logging
+logging.basicConfig()
+cron_logger = logging.getLogger('django_cron')
+cron_logger.setLevel(logging.INFO)

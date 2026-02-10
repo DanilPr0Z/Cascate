@@ -5,37 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Cascate Porte - Дизайнерская мебель{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Top Navigation Bar -->
-    <div class="top-nav">
-        <div class="container">
-            <div class="top-nav-left">
-                <a href="{% url 'catalog:catalog' %}">О компании</a>
-                <a href="#">Проекты</a>
-                <a href="#">Блог</a>
-                <a href="#">Дизайнеры</a>
-                <a href="#">Производители</a>
-                <a href="#">Отзывы</a>
-                <a href="#">Доставка и оплата</a>
-                <a href="#">Адреса салонов</a>
-            </div>
-            <div class="top-nav-right">
-                <span class="working-hours">с 10:00 до 20:00 ежедневно</span>
-                <a href="tel:+74950235717" class="phone">+7 (495) 023-57-17</a>
-                <a href="#" class="callback-link">Заказать обратный звонок</a>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Navigation -->
     <div class="main-nav">
         <div class="container">
             <div class="nav-left">
-                <a href="{% url 'catalog:catalog' %}" class="logo">
-                    <span class="logo-text">Cascate <span class="logo-accent">Porte</span></span>
+                <a href="https://cascate.ru" class="logo">
+                    <img src="{% static 'images/logo-navbar.png' %}" alt="Cascate Porte e mobile" class="logo-image">
                 </a>
                 <a href="{% url 'catalog:catalog' %}" class="catalog-btn">
                     <svg class="hamburger" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -46,29 +28,7 @@
                     Каталог
                 </a>
             </div>
-            <div class="nav-center">
-                <div class="search-box">
-                    <input type="text" placeholder="Поиск товара" class="search-input">
-                    <button class="search-icon" type="button" title="Поиск">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                    </button>
-                    <button class="camera-icon" type="button" title="Поиск по фото">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                            <circle cx="12" cy="13" r="4"></circle>
-                        </svg>
-                    </button>
-                </div>
-            </div>
             <div class="nav-right">
-                <a href="#" class="nav-icon favorite-icon" title="Избранное">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                </a>
                 <a href="{% url 'cart:cart' %}" class="nav-icon cart-icon" title="Корзина">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -132,13 +92,69 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Chat Widget -->
-    <div class="chat-widget">
-        <div class="chat-bubble">Напишите нам, мы онлайн!</div>
-    </div>
-
     <!-- Scroll to Top Button -->
     <button class="scroll-top" id="scrollTop">↑</button>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <a href="https://cascate.ru" class="footer-logo">
+                        <img src="{% static 'images/logo-footer.png' %}" alt="Cascate Porte e mobile" class="footer-logo-image">
+                    </a>
+                    <p class="footer-brand-name">Cascate porte e mobile</p>
+                    <p class="footer-note">* Соцсеть запрещена на территории РФ</p>
+                </div>
+
+                <div class="footer-center">
+                    <div class="footer-links">
+                        <a href="https://cascate.ru/login/" class="footer-link" target="_blank" rel="noopener noreferrer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Личный кабинет
+                        </a>
+                        <a href="https://cascate.ru/page/contacts/" class="footer-link" target="_blank" rel="noopener noreferrer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            Контакты
+                        </a>
+                    </div>
+
+                    <div class="footer-info">
+                        <div class="footer-info-row">
+                            <span class="footer-info-text"><a href="https://yandex.ru/maps/org/cascate_porte/191571852066/?from=mapframe&ll=37.457987%2C55.777758&z=16" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">г. Москва, проспект Маршала Жукова д.59</a></span>
+                            <span class="footer-info-text">тел. Call-центр - <a href="tel:+78002340173" style="color: inherit; text-decoration: none;">+7 800 234 01 73</a></span>
+                            <span class="footer-info-text"><a href="mailto:store@cascate.ru" style="color: inherit; text-decoration: none;">store@cascate.ru</a></span>
+                        </div>
+                        <div class="footer-info-row">
+                            <span class="footer-info-text"><a href="https://yandex.ru/maps/org/cascate_porte_e_mobile/144208528535/?from=mapframe&ll=37.622818%2C55.787371&z=16" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">г. Москва, Олимпийский проспект, 22</a></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-right">
+                    <div class="footer-social">
+                        <a href="https://www.youtube.com/channel/UCj-V7Fi3Z5qM1eGEvWQODIg" class="social-icon" target="_blank" rel="noopener noreferrer">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com/cascate_porte_russia" class="social-icon" target="_blank" rel="noopener noreferrer">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}

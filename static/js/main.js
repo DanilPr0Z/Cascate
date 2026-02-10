@@ -51,13 +51,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Function to show specific submenu
-    function showSubmenu(categorySlug) {
+    function showSubmenu(categorySlug, linkElement) {
         console.log('Showing submenu for:', categorySlug);
         hideAllSubmenus();
         const submenu = document.getElementById('submenu-' + categorySlug);
         console.log('Submenu element:', submenu);
-        if (submenu) {
+        if (submenu && linkElement) {
             clearTimeout(hideSubmenuTimeout);
+
+            // Temporarily show submenu to get its width
+            submenu.style.display = 'block';
+            submenu.style.visibility = 'hidden';
+            submenu.style.opacity = '0';
+
+            // Position submenu centered under the category link
+            const linkRect = linkElement.getBoundingClientRect();
+            const navWrapper = document.querySelector('.secondary-nav-wrapper');
+            const wrapperRect = navWrapper.getBoundingClientRect();
+
+            // Get actual submenu width
+            const submenuWidth = submenu.offsetWidth;
+
+            // Calculate center position
+            const linkCenter = linkRect.left + (linkRect.width / 2);
+            const leftPosition = (linkCenter - wrapperRect.left) - (submenuWidth / 2);
+
+            submenu.style.left = leftPosition + 'px';
+            submenu.style.visibility = 'visible';
+            submenu.style.opacity = '';
+
             submenu.classList.add('active');
             currentActiveSubmenu = submenu;
         }
@@ -72,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show submenu on hover
             link.addEventListener('mouseenter', function() {
                 clearTimeout(hideSubmenuTimeout);
-                showSubmenu(categorySlug);
+                showSubmenu(categorySlug, link);
             });
 
             // Hide submenu with delay when leaving link
@@ -107,6 +129,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isClickInsideNav && !isClickInsideSubmenu) {
             hideAllSubmenus();
         }
+    });
+
+    // Protect logo images from copying
+    const logoImages = document.querySelectorAll('.logo-image, .footer-logo-image');
+    logoImages.forEach(img => {
+        // Prevent right-click context menu
+        img.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Prevent drag
+        img.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
     });
 });
 

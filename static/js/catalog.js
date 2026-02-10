@@ -7,13 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (url) {
             card.addEventListener('click', function(e) {
-                // Don't navigate if clicking on subcategory link or overlay content
+                // Don't navigate if clicking on subcategory link
                 if (e.target.closest('.subcategory-link')) {
                     // Let the link work naturally
-                    return;
-                }
-                // Don't navigate if clicking inside overlay area (except links)
-                if (e.target.closest('.category-overlay')) {
                     return;
                 }
                 // Navigate to category page

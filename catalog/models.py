@@ -162,6 +162,21 @@ class Product(models.Model):
         """Возвращает главное изображение товара"""
         return self.images.filter(is_main=True).first() or self.images.first()
 
+    def get_average_rating(self):
+        """Возвращает средний рейтинг товара"""
+        from django.db.models import Avg
+        avg = self.ratings.aggregate(Avg('rating'))['rating__avg']
+        return round(avg, 1) if avg else 0
+
+    def get_ratings_count(self):
+        """Возвращает количество оценок"""
+        return self.ratings.count()
+
+    def get_user_rating(self, session_key):
+        """Возвращает оценку пользователя"""
+        rating = self.ratings.filter(session_key=session_key).first()
+        return rating.rating if rating else 0
+
     def clean(self):
         """Валидация: подкатегория должна принадлежать выбранной категории"""
         if self.subcategory and self.category:
@@ -172,7 +187,21 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = transliterate_slugify(self.name)
+            base_slug = transliterate_slugify(self.name)
+            slug = base_slug
+
+            # Если slug уже существует, добавляем product_number или счетчик
+            if Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                if self.product_number:
+                    slug = f"{base_slug}-{transliterate_slugify(self.product_number)}"
+                else:
+                    counter = 1
+                    while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                        slug = f"{base_slug}-{counter}"
+                        counter += 1
+
+            self.slug = slug
+
         # Автоматически исправляем несоответствие категории и подкатегории
         if self.subcategory and self.subcategory.category != self.category:
             self.category = self.subcategory.category
@@ -237,4 +266,21 @@ class ProductStock(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.store.name}: {self.quantity} шт."
+
+
+class ProductRating(models.Model):
+    """Рейтинг товара"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ratings', verbose_name="Товар")
+    session_key = models.CharField(max_length=40, verbose_name="Ключ сессии")
+    rating = models.PositiveSmallIntegerField(verbose_name="Оценка", choices=[(i, i) for i in range(1, 6)])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Рейтинг товара"
+        verbose_name_plural = "Рейтинги товаров"
+        unique_together = ['product', 'session_key']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.product.name} - {self.rating} звезд"
 

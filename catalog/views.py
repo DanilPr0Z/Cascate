@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q, Count
-from .models import Category, Product, SubCategory, FilterCategory, FilterValue
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from .models import Category, Product, SubCategory, FilterCategory, FilterValue, ProductRating
 
 
 def catalog_view(request):
@@ -170,9 +172,53 @@ def product_detail(request, slug):
             category=product.category
         ).exclude(id=product.id)[:4]
 
+    # Получаем или создаем ключ сессии
+    if not request.session.session_key:
+        request.session.create()
+
+    session_key = request.session.session_key
+
     context = {
         'product': product,
         'related_products': related_products,
+        'average_rating': product.get_average_rating(),
+        'ratings_count': product.get_ratings_count(),
+        'user_rating': product.get_user_rating(session_key),
     }
     return render(request, 'catalog/product_detail.html', context)
+
+
+@require_POST
+def rate_product(request, product_id):
+    """Сохранение рейтинга товара"""
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        rating_value = int(request.POST.get('rating', 0))
+
+        if rating_value < 1 or rating_value > 5:
+            return JsonResponse({'error': 'Неверное значение рейтинга'}, status=400)
+
+        # Получаем или создаем ключ сессии
+        if not request.session.session_key:
+            request.session.create()
+
+        session_key = request.session.session_key
+
+        # Обновляем или создаем рейтинг
+        rating, created = ProductRating.objects.update_or_create(
+            product=product,
+            session_key=session_key,
+            defaults={'rating': rating_value}
+        )
+
+        return JsonResponse({
+            'success': True,
+            'average_rating': product.get_average_rating(),
+            'ratings_count': product.get_ratings_count(),
+            'user_rating': rating_value,
+            'message': 'Спасибо за вашу оценку!' if created else 'Ваша оценка обновлена!'
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 

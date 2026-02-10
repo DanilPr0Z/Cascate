@@ -49,9 +49,6 @@
                                 {% endwith %}
                                 <div class="product-details">
                                     <a href="{{ item.product.get_absolute_url }}" class="product-name">{{ item.product.name }}</a>
-                                    {% if item.product.product_number %}
-                                    <span class="product-number">Артикул: {{ item.product.product_number }}</span>
-                                    {% endif %}
                                 </div>
                             </div>
                         </td>

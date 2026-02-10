@@ -1,16 +1,16 @@
 /* Стили для страниц авторизации - Cascate Porte */
 
 :root {
-    --primary-color: #8B7355;
-    --primary-color-hover: #6B5943;
-    --text-dark: #3A352D;
-    --text-light: #6B6357;
-    --bg-light: #F5F3F0;
-    --border-color: #D4C8B8;
+    --primary-color: #444;
+    --primary-color-hover: #333;
+    --text-dark: #333;
+    --text-light: #666;
+    --bg-light: #F5F5F5;
+    --border-color: #DDD;
     --white: #ffffff;
     --error-color: #dc3545;
     --success-color: #28a745;
-    --shadow: 0 2px 8px rgba(59, 53, 45, 0.1);
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .auth-container {

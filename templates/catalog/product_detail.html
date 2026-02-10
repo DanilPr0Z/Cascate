@@ -40,21 +40,19 @@
 
                 <!-- Звездочки для оценки -->
                 <div class="product-rating">
-                    <div class="stars">
-                        <span class="star">☆</span>
-                        <span class="star">☆</span>
-                        <span class="star">☆</span>
-                        <span class="star">☆</span>
-                        <span class="star">☆</span>
+                    <div class="stars" id="rating-stars" data-product-id="{{ product.id }}" data-user-rating="{{ user_rating }}">
+                        {% for i in "12345" %}
+                        <span class="star {% if user_rating >= forloop.counter %}filled{% endif %}" data-rating="{{ forloop.counter }}">★</span>
+                        {% endfor %}
                     </div>
-                    <span class="rating-text">Ваша оценка будет первой!</span>
+                    <span class="rating-text" id="rating-text">
+                        {% if ratings_count > 0 %}
+                            Средний рейтинг: <strong>{{ average_rating }}</strong> ({{ ratings_count }} {{ ratings_count|pluralize:"оценка,оценки,оценок" }})
+                        {% else %}
+                            Ваша оценка будет первой!
+                        {% endif %}
+                    </span>
                 </div>
-
-                {% if product.product_number %}
-                <div class="product-number">
-                    Номер товара: {{ product.product_number }}
-                </div>
-                {% endif %}
 
                 <div class="product-price-large">
                     {{ product.price|floatformat:0 }} ₽
@@ -126,12 +124,6 @@
                         <img src="{{ main_image.image.url }}" alt="{{ related_product.name }}" class="product-image">
                         {% endif %}
                         {% endwith %}
-                        <div class="product-overlay">
-                            <div class="product-actions">
-                                <button class="product-action-btn favorite-btn">❤️</button>
-                                <button class="product-action-btn cart-btn add-to-cart-btn" data-product-id="{{ related_product.id }}">🛍️</button>
-                            </div>
-                        </div>
                         <div class="product-availability">
                             {% if related_product.availability == 'in_stock' %}
                             <span class="availability-dot in-stock"></span>
@@ -158,6 +150,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{% csrf_token %}
 <script src="{% static 'js/product_detail.js' %}"></script>
 <script src="{% static 'js/cart.js' %}"></script>
 <script>

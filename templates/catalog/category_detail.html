@@ -23,110 +23,6 @@
         </div>
 
         <div class="category-content">
-            <!-- Filters Sidebar -->
-            <aside class="filters-sidebar">
-                <form method="get" id="filter-form">
-                    <!-- Сохраняем другие параметры фильтрации -->
-                    {% for filter in current_filters %}
-                    <input type="hidden" name="filter" value="{{ filter }}">
-                    {% endfor %}
-                    {% if availability_filter %}
-                    <input type="hidden" name="availability" value="{{ availability_filter }}">
-                    {% endif %}
-                    {% if search_query %}
-                    <input type="hidden" name="search" value="{{ search_query }}">
-                    {% endif %}
-                    {% if sort_by %}
-                    <input type="hidden" name="sort" value="{{ sort_by }}">
-                    {% endif %}
-                    
-                    <h3>Фильтры</h3>
-                    
-                    <!-- Subcategories Filter -->
-                    {% if subcategories %}
-                    <div class="filter-group">
-                        <h4>Подкатегории</h4>
-                        <div class="filter-values">
-                            <label class="radio-label">
-                                <input type="radio" name="subcategory" value="" 
-                                       {% if not selected_subcategory %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <span>Все ({{ category.products.count }})</span>
-                            </label>
-                            {% for subcat in subcategories %}
-                            <label class="radio-label">
-                                <input type="radio" name="subcategory" value="{{ subcat.slug }}"
-                                       {% if selected_subcategory == subcat.slug %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <span>{{ subcat.name }} ({{ subcat.products_count }})</span>
-                            </label>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                
-                    <!-- Availability Filters -->
-                    <div class="filter-group">
-                        <h4>Наличие</h4>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="availability" value="in_stock" 
-                                   {% if availability_filter == 'in_stock' %}checked{% endif %}
-                                   onchange="this.form.submit()">
-                            <span>В наличии</span>
-                        </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="on_the_way"
-                               {% if availability_filter == 'on_the_way' %}checked{% endif %}
-                               onchange="this.form.submit()">
-                        <span>Товар в пути</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="new_2025"
-                               {% if availability_filter == 'new_2025' %}checked{% endif %}
-                               onchange="this.form.submit()">
-                        <span>Новинка 2025 года</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="new_arrival"
-                               {% if availability_filter == 'new_arrival' %}checked{% endif %}
-                               onchange="this.form.submit()">
-                        <span>Новое поступление</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="best_offer"
-                               {% if availability_filter == 'best_offer' %}checked{% endif %}
-                               onchange="this.form.submit()">
-                        <span>Лучшее предложение</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="availability" value="online_fitting"
-                               {% if availability_filter == 'online_fitting' %}checked{% endif %}
-                               onchange="this.form.submit()">
-                        <span>Онлайн-примерка</span>
-                    </label>
-                </div>
-
-                    <!-- Filter Categories -->
-                    {% for filter_slug, filter_data in filter_stats.items %}
-                    {% if filter_data.values %}
-                    <div class="filter-group">
-                        <h4>{{ filter_data.category.name }}</h4>
-                        <div class="filter-values">
-                            {% for item in filter_data.values %}
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="filter" value="{{ item.value.slug }}"
-                                       {% if item.is_active %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <span>{{ item.value.name }} ({{ item.count }})</span>
-                            </label>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </form>
-            </aside>
-
             <!-- Products Grid -->
             <div class="products-section">
                 <div class="products-toolbar">
@@ -166,10 +62,6 @@
                             {% endif %}
                             
                             <div class="product-overlay">
-                                <div class="product-actions">
-                                    <button class="product-action-btn favorite-btn" title="В избранное">❤️</button>
-                                    <button class="product-action-btn cart-btn add-to-cart-btn" data-product-id="{{ product.id }}" title="В корзину">🛍️</button>
-                                </div>
                                 {% if product.images.count > 1 %}
                                 <div class="product-thumbnails">
                                     {% for image in product.images.all|slice:":4" %}
@@ -199,9 +91,6 @@
                                 {% endif %}
                                 {% if product.dimensions %}
                                 <p class="product-detail">Размеры: {{ product.dimensions }}</p>
-                                {% endif %}
-                                {% if product.product_number %}
-                                <p class="product-detail">Номер товара: {{ product.product_number }}</p>
                                 {% endif %}
                                 <button class="btn-add-to-cart" data-product-id="{{ product.id }}">В КОРЗИНУ</button>
                             </div>
