@@ -73,22 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // View in salon button
-    const viewSalonBtn = document.querySelector('.view-in-salon-btn');
-    if (viewSalonBtn) {
-        viewSalonBtn.addEventListener('click', function() {
-            alert('Функция "Посмотреть в салоне" будет доступна в ближайшее время');
-        });
-    }
-
-    // Details button
-    const detailsBtn = document.querySelector('.details-btn');
-    if (detailsBtn) {
-        detailsBtn.addEventListener('click', function() {
-            alert('Менеджер свяжется с вами в ближайшее время');
-        });
-    }
-
     // Rating functionality
     const ratingStars = document.getElementById('rating-stars');
     console.log('Rating stars element:', ratingStars);

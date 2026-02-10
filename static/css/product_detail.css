@@ -165,6 +165,9 @@
     transition: all 0.3s;
     font-size: 14px;
     font-weight: 600;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
 }
 
 .btn-outline:hover {

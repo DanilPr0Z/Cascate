@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_cron',  # Периодические задачи
     'catalog',
-    'accounts',
     'cart',
 ]
 

@@ -60,7 +60,7 @@
 
                 <div class="product-actions">
                     <button class="btn-primary add-to-cart-btn" data-product-id="{{ product.id }}">ДОБАВИТЬ В КОРЗИНУ</button>
-                    <button class="btn-outline view-in-salon-btn">ПОСМОТРЕТЬ В САЛОНЕ</button>
+                    <a href="https://360space.ru/catalog/mttr-cascate-porte-e-mobile-olimp22/fullscreen/" class="btn-outline view-in-salon-btn" target="_blank" rel="noopener noreferrer">ПОСМОТРЕТЬ В САЛОНЕ</a>
                 </div>
 
                 {% if product.availability == 'in_stock' %}
@@ -101,7 +101,7 @@
                     {% endif %}
                 </div>
 
-                <button class="btn-outline details-btn">Уточнить детали</button>
+                <a href="tel:+78002340173" class="btn-outline details-btn">Уточнить детали</a>
 
                 {% if product.description %}
                 <div class="product-description">

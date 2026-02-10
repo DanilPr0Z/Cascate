@@ -58,7 +58,7 @@
                         <td class="cart-product-quantity">
                             <div class="quantity-control">
                                 <button type="button" class="qty-btn qty-minus" data-item-id="{{ item.id }}">−</button>
-                                <input type="number" class="qty-input" value="{{ item.quantity }}" min="1" readonly>
+                                <input type="number" class="qty-input" value="{{ item.quantity }}" min="1" data-item-id="{{ item.id }}">
                                 <button type="button" class="qty-btn qty-plus" data-item-id="{{ item.id }}">+</button>
                             </div>
                         </td>
@@ -124,30 +124,6 @@
                     <span>Оформление заказов скоро будет доступно</span>
                 </div>
             </div>
-
-            <div class="cart-benefits">
-                <h3 class="benefits-title">Преимущества покупки</h3>
-                <ul class="benefits-list">
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Бесплатная доставка</span>
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Гарантия качества</span>
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Возврат в течение 14 дней</span>
-                    </li>
-                </ul>
-            </div>
         </div>
     </div>
     {% else %}
@@ -164,6 +140,18 @@
         <a href="{% url 'catalog:catalog' %}" class="btn-primary">Перейти в каталог</a>
     </div>
     {% endif %}
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h3>Удалить товар из корзины?</h3>
+        <p>Вы уверены, что хотите удалить этот товар?</p>
+        <div class="modal-actions">
+            <button id="confirmDelete" class="btn-confirm">Удалить</button>
+            <button id="cancelDelete" class="btn-cancel">Отмена</button>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

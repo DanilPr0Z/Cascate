@@ -96,39 +96,74 @@ function showNotification(message, type = 'success') {
 
 // Удалить товар из корзины
 function removeFromCart(itemId) {
-    if (!confirm('Удалить товар из корзины?')) return;
+    const modal = document.getElementById('deleteModal');
+    const confirmBtn = document.getElementById('confirmDelete');
+    const cancelBtn = document.getElementById('cancelDelete');
 
-    fetch(`/cart/remove/${itemId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrftoken,
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Удалить строку из таблицы
-            const row = document.querySelector(`#cart-item-${itemId}`);
-            if (row) {
-                row.remove();
+    // Показать модальное окно
+    modal.classList.add('show');
+
+    // Обработчик подтверждения
+    const handleConfirm = function() {
+        modal.classList.remove('show');
+
+        fetch(`/cart/remove/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Удалить строку из таблицы
+                const row = document.querySelector(`#cart-item-${itemId}`);
+                if (row) {
+                    row.remove();
+                }
+
+                // Обновить итоги
+                updateCartCount(data.cart_count);
+                updateCartTotal(data.total_price);
+
+                // Если корзина пуста - перезагрузить страницу
+                if (data.cart_count === 0) {
+                    location.reload();
+                }
+
+                showNotification('Товар удален из корзины', 'success');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Ошибка при удалении товара', 'error');
+        });
 
-            // Обновить итоги
-            updateCartCount(data.cart_count);
-            updateCartTotal(data.total_price);
+        // Удалить обработчики
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+        modal.removeEventListener('click', handleOutsideClick);
+    };
 
-            // Если корзина пуста - перезагрузить страницу
-            if (data.cart_count === 0) {
-                location.reload();
-            }
+    // Обработчик отмены
+    const handleCancel = function() {
+        modal.classList.remove('show');
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+        modal.removeEventListener('click', handleOutsideClick);
+    };
 
-            showNotification('Товар удален из корзины', 'success');
+    // Обработчик клика вне модального окна
+    const handleOutsideClick = function(e) {
+        if (e.target === modal) {
+            handleCancel();
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('Ошибка при удалении товара', 'error');
-    });
+    };
+
+    // Добавить обработчики
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleCancel);
+    modal.addEventListener('click', handleOutsideClick);
 }
 
 // Изменить количество
@@ -213,15 +248,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Прямое изменение в input
-    document.querySelectorAll('.quantity-input').forEach(input => {
+    document.querySelectorAll('.qty-input').forEach(input => {
         input.addEventListener('change', function() {
             const itemId = this.dataset.itemId;
             let quantity = parseInt(this.value);
-            if (quantity < 1) {
+            if (quantity < 1 || isNaN(quantity)) {
                 quantity = 1;
                 this.value = 1;
             }
             updateQuantity(itemId, quantity);
+        });
+
+        // Также отслеживать событие blur (потеря фокуса)
+        input.addEventListener('blur', function() {
+            const itemId = this.dataset.itemId;
+            let quantity = parseInt(this.value);
+            if (quantity < 1 || isNaN(quantity)) {
+                quantity = 1;
+                this.value = 1;
+                updateQuantity(itemId, quantity);
+            }
         });
     });
 
