@@ -4,8 +4,22 @@ from catalog.models import Product
 
 
 class Cart(models.Model):
-    """Корзина пользователя"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart', verbose_name="Пользователь")
+    """Корзина пользователя или анонимной сессии"""
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name="Пользователь",
+        null=True,
+        blank=True
+    )
+    session_key = models.CharField(
+        max_length=40,
+        verbose_name="Ключ сессии",
+        null=True,
+        blank=True,
+        db_index=True
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создана")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлена")
 
@@ -14,7 +28,9 @@ class Cart(models.Model):
         verbose_name_plural = "Корзины"
 
     def __str__(self):
-        return f"Корзина {self.user.username}"
+        if self.user:
+            return f"Корзина {self.user.username}"
+        return f"Корзина сессии {self.session_key}"
 
     def get_total_price(self):
         """Общая стоимость всех товаров в корзине"""

@@ -53,15 +53,17 @@ def category_detail(request, slug):
         )
     
     # Сортировка
-    sort_by = request.GET.get('sort', 'availability')
+    sort_by = request.GET.get('sort', '-created_at')
     if sort_by == 'price_asc':
         products = products.order_by('price')
     elif sort_by == 'price_desc':
         products = products.order_by('-price')
     elif sort_by == 'name':
         products = products.order_by('name')
-    else:  # availability
-        products = products.order_by('-availability', 'name')
+    elif sort_by == 'availability':
+        products = products.order_by('-created_at')  # Временно сортируем по дате
+    else:  # -created_at
+        products = products.order_by('-created_at')
     
     # Подсчет товаров по категориям фильтров (для текущей выборки)
     # Используем базовую выборку с учетом подкатегории
@@ -128,15 +130,17 @@ def subcategory_detail(request, category_slug, subcategory_slug):
     if availability:
         products = products.filter(availability=availability)
     
-    sort_by = request.GET.get('sort', 'availability')
+    sort_by = request.GET.get('sort', '-created_at')
     if sort_by == 'price_asc':
         products = products.order_by('price')
     elif sort_by == 'price_desc':
         products = products.order_by('-price')
     elif sort_by == 'name':
         products = products.order_by('name')
-    else:
-        products = products.order_by('-availability', 'name')
+    elif sort_by == 'availability':
+        products = products.order_by('-created_at')  # Временно сортируем по дате
+    else:  # -created_at
+        products = products.order_by('-created_at')
     
     context = {
         'category': category,

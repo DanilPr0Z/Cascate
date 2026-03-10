@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ product.name }} - Cascate Porte{% endblock %}
+{% block title %}{{ product.name }} Cascate Porte{% endblock %}
 
 {% block breadcrumbs_content %}
     <span class="separator">></span>
@@ -63,23 +63,10 @@
                     <a href="https://360space.ru/catalog/mttr-cascate-porte-e-mobile-olimp22/fullscreen/" class="btn-outline view-in-salon-btn" target="_blank" rel="noopener noreferrer">ПОСМОТРЕТЬ В САЛОНЕ</a>
                 </div>
 
-                {% if product.availability == 'in_stock' %}
-                <div class="product-availability-badge">
+                <div class="product-availability-simple">
                     <span class="availability-dot in-stock"></span>
-                    <span>В наличии:</span>
+                    <span>В наличии</span>
                 </div>
-                {% if product.stock.exists %}
-                <div class="product-stores">
-                    {% for stock in product.stock.all %}
-                    <div class="store-item">
-                        <strong>{{ stock.store.name }}</strong>
-                        <span>{{ stock.store.address }}</span>
-                        <span class="stock-quantity">Количество: {{ stock.quantity }} шт.</span>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {% endif %}
 
                 <div class="product-specifications">
                     {% if product.country %}
@@ -102,13 +89,6 @@
                 </div>
 
                 <a href="tel:+78002340173" class="btn-outline details-btn">Уточнить детали</a>
-
-                {% if product.description %}
-                <div class="product-description">
-                    <h3>О товаре</h3>
-                    <p>{{ product.description|linebreaks }}</p>
-                </div>
-                {% endif %}
             </div>
         </div>
 
@@ -125,10 +105,8 @@
                         {% endif %}
                         {% endwith %}
                         <div class="product-availability">
-                            {% if related_product.availability == 'in_stock' %}
                             <span class="availability-dot in-stock"></span>
                             <span>В наличии</span>
-                            {% endif %}
                         </div>
                     </div>
                     <div class="product-info">

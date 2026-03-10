@@ -278,4 +278,111 @@ document.addEventListener('DOMContentLoaded', function() {
             removeFromCart(itemId);
         });
     });
+
+    // Модальное окно оформления заказа
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const orderModal = document.getElementById('orderModal');
+    const orderModalClose = document.getElementById('orderModalClose');
+    const cancelOrder = document.getElementById('cancelOrder');
+    const orderForm = document.getElementById('orderForm');
+    const orderSuccess = document.getElementById('orderSuccess');
+    const phoneInput = document.getElementById('phone');
+
+    if (checkoutBtn && orderModal) {
+        // Открыть модальное окно
+        checkoutBtn.addEventListener('click', function() {
+            orderModal.classList.add('show');
+        });
+
+        // Закрыть модальное окно
+        const closeModal = function() {
+            orderModal.classList.remove('show');
+            orderForm.style.display = 'block';
+            orderSuccess.style.display = 'none';
+            orderForm.reset();
+        };
+
+        orderModalClose.addEventListener('click', closeModal);
+        cancelOrder.addEventListener('click', closeModal);
+
+        // Закрытие при клике вне модального окна
+        orderModal.addEventListener('click', function(e) {
+            if (e.target === orderModal) {
+                closeModal();
+            }
+        });
+
+        // Маска для телефона
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+
+                if (value.length > 0) {
+                    if (value[0] === '8') {
+                        value = '7' + value.slice(1);
+                    }
+                    if (value[0] !== '7') {
+                        value = '7' + value;
+                    }
+                }
+
+                let formattedValue = '+7';
+
+                if (value.length > 1) {
+                    formattedValue += ' (' + value.substring(1, 4);
+                }
+                if (value.length >= 4) {
+                    formattedValue += ') ' + value.substring(4, 7);
+                }
+                if (value.length >= 7) {
+                    formattedValue += '-' + value.substring(7, 9);
+                }
+                if (value.length >= 9) {
+                    formattedValue += '-' + value.substring(9, 11);
+                }
+
+                e.target.value = formattedValue;
+            });
+        }
+
+        // Отправка формы
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(orderForm);
+
+            fetch(orderForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Показать сообщение об успехе
+                    orderForm.style.display = 'none';
+                    orderSuccess.style.display = 'block';
+
+                    // Закрыть модальное окно через 3 секунды
+                    setTimeout(() => {
+                        orderModal.classList.remove('show');
+                        orderForm.style.display = 'block';
+                        orderSuccess.style.display = 'none';
+                        orderForm.reset();
+
+                        // Перезагрузить страницу или перенаправить
+                        location.reload();
+                    }, 3000);
+                } else {
+                    showNotification(data.message || 'Ошибка при оформлении заказа', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Ошибка при оформлении заказа', 'error');
+            });
+        });
+    }
 });

@@ -26,6 +26,7 @@ body {
     line-height: 1.6;
     background-color: var(--white);
     font-weight: 400;
+    margin-left: 90px; /* Space for vertical navbar */
 }
 
 /* Элегантная типографика для заголовков */
@@ -92,38 +93,57 @@ h1, h2, h3, h4, h5, h6 {
     text-decoration: none;
 }
 
-/* Main Navigation */
+/* Main Navigation - Vertical Sidebar */
 .main-nav {
     background-color: var(--white);
-    padding: 18px 0;
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
+    border-right: 1px solid var(--border-color);
+    position: fixed;
+    left: 0;
     top: 0;
+    bottom: 0;
+    width: 90px;
     z-index: 1000;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
 }
 
-.main-nav .container {
+.nav-top {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
+    padding: 20px 10px;
+    flex: 0 0 auto;
 }
 
-.nav-left {
+.nav-middle {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 15px;
+    justify-content: center;
     flex: 1;
+    padding: 20px 10px;
+}
+
+.nav-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    flex: 0 0 auto;
 }
 
 .logo {
     text-decoration: none;
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 90px;
 }
 
 .logo-image {
-    height: 70px;
+    height: 55px;
     width: auto;
     object-fit: contain;
     pointer-events: none;
@@ -132,50 +152,21 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-}
-
-.catalog-btn {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 6px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 500;
-    font-size: 15px;
-    transition: background-color 0.3s;
-    border: none;
-    cursor: pointer;
-}
-
-.catalog-btn:hover {
-    background-color: var(--primary-color-hover);
-}
-
-.hamburger {
-    width: 20px;
-    height: 20px;
-    display: block;
-    flex-shrink: 0;
-}
-
-.nav-right {
-    display: flex;
-    gap: 15px;
+    transform: rotate(-90deg);
+    transform-origin: center center;
 }
 
 .nav-icon {
-    font-size: 26px;
+    font-size: 24px;
     text-decoration: none;
-    transition: transform 0.3s;
+    transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 45px;
+    height: 45px;
     color: var(--text-dark);
+    border-radius: 8px;
 }
 
 .nav-icon svg {
@@ -184,7 +175,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-icon:hover {
-    transform: scale(1.15);
+    background-color: var(--bg-light);
     color: var(--primary-color);
 }
 
@@ -208,19 +199,19 @@ h1, h2, h3, h4, h5, h6 {
 
 .cart-badge {
     position: absolute;
-    top: -5px;
-    right: -8px;
+    top: 5px;
+    right: 5px;
     background-color: var(--primary-color);
     color: white;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 9px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 5px;
+    padding: 0 4px;
 }
 
 /* Secondary Navigation Wrapper */
@@ -249,8 +240,10 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 14px;
     transition: color 0.3s;
     white-space: nowrap;
-    font-weight: 400;
+    font-weight: 700;
     position: relative;
+    text-transform: uppercase;
+    font-family: "PT Sans", Arial, Helvetica, sans-serif;
 }
 
 .secondary-nav a:hover {
@@ -297,6 +290,7 @@ h1, h2, h3, h4, h5, h6 {
     flex-direction: column;
     gap: 8px;
     padding: 15px 20px;
+    text-align: left;
 }
 
 .submenu-item {
@@ -304,9 +298,22 @@ h1, h2, h3, h4, h5, h6 {
     text-decoration: none;
     font-size: 13px;
     transition: all 0.3s;
-    display: block;
+    display: flex;
+    align-items: center;
     padding: 8px 12px;
     border-radius: 4px;
+    position: relative;
+}
+
+.submenu-item::before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #000;
+    border: 2px solid #fff;
+    margin-right: 10px;
+    flex-shrink: 0;
 }
 
 .submenu-item:hover {
@@ -318,7 +325,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Breadcrumbs */
 .breadcrumbs {
     background-color: var(--bg-light);
-    padding: 10px 0;
+    padding: 0;
     font-size: 14px;
 }
 
@@ -782,4 +789,117 @@ h1, h2, h3, h4, h5, h6 {
     .footer-right {
         justify-content: flex-start;
     }
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    position: fixed;
+    top: 0;
+    left: -100vw;
+    width: 100vw;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+}
+
+.sidebar-menu.active {
+    left: 0;
+}
+
+.sidebar-header {
+    position: fixed;
+    left: 1cm;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2001;
+}
+
+.sidebar-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    transition: all 0.3s;
+    border-radius: 4px;
+}
+
+.sidebar-close:hover {
+    background-color: var(--bg-light);
+    color: var(--primary-color);
+}
+
+.sidebar-nav {
+    padding: 20px 0;
+    margin-left: 1cm;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 15px 30px;
+    color: var(--text-dark);
+    text-decoration: none;
+    font-size: 22px;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+    font-family: "PT Sans", Arial, Helvetica, sans-serif;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.sidebar-link:hover {
+    background-color: var(--bg-light);
+    border-left-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.sidebar-category {
+    padding-left: 45px;
+    font-size: 15px;
+    color: var(--text-light);
+}
+
+.sidebar-divider {
+    padding: 20px 30px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Menu button as button element */
+.menu-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-icon:hover {
+    background-color: var(--bg-light);
 }

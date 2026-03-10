@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Корзина - Cascate Porte{% endblock %}
+{% block title %}Корзина Cascate Porte{% endblock %}
 
 {% block breadcrumbs_content %}
     <span class="separator">></span>
@@ -36,15 +36,19 @@
                             <div class="product-info-wrapper">
                                 {% with main_image=item.product.get_main_image %}
                                 {% if main_image %}
-                                <img src="{{ main_image.image.url }}" alt="{{ item.product.name }}" class="cart-product-image">
+                                <a href="{{ item.product.get_absolute_url }}">
+                                    <img src="{{ main_image.image.url }}" alt="{{ item.product.name }}" class="cart-product-image">
+                                </a>
                                 {% else %}
-                                <div class="cart-product-image-placeholder">
-                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </div>
+                                <a href="{{ item.product.get_absolute_url }}">
+                                    <div class="cart-product-image-placeholder">
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                    </div>
+                                </a>
                                 {% endif %}
                                 {% endwith %}
                                 <div class="product-details">
@@ -111,18 +115,18 @@
                     <span class="cart-total-price">{{ total_price|floatformat:0 }} ₽</span>
                 </div>
 
-                <button class="btn-checkout" disabled title="Оформление заказов будет добавлено позже">
+                <button class="btn-checkout" id="checkoutBtn">
                     Оформить заказ
                 </button>
 
-                <div class="summary-note">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                <a href="{% url 'cart:download_order' %}" class="btn-download-pdf" download>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    <span>Оформление заказов скоро будет доступно</span>
-                </div>
+                    Скачать заказ (PDF)
+                </a>
             </div>
         </div>
     </div>
@@ -150,6 +154,51 @@
         <div class="modal-actions">
             <button id="confirmDelete" class="btn-confirm">Удалить</button>
             <button id="cancelDelete" class="btn-cancel">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно оформления заказа -->
+<div id="orderModal" class="modal">
+    <div class="modal-content modal-order">
+        <button class="modal-close" id="orderModalClose">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+        <h3>Оформление заказа</h3>
+        <p>Пожалуйста, заполните ваши данные для оформления заказа</p>
+        <form id="orderForm" method="post" action="{% url 'cart:submit_order' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="firstName">Имя *</label>
+                <input type="text" id="firstName" name="first_name" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Фамилия *</label>
+                <input type="text" id="lastName" name="last_name" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Номер телефона *</label>
+                <input type="tel" id="phone" name="phone" required placeholder="+7 (___) ___-__-__">
+            </div>
+            <div class="form-group">
+                <label for="email">Email (необязательно)</label>
+                <input type="email" id="email" name="email" placeholder="example@mail.ru">
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn-confirm">Отправить заказ</button>
+                <button type="button" id="cancelOrder" class="btn-cancel">Отмена</button>
+            </div>
+        </form>
+        <div id="orderSuccess" class="order-success" style="display: none;">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <h4>Заказ успешно отправлен!</h4>
+            <p>Заказ отправлен на почту. Мы свяжемся с вами в ближайшее время.</p>
         </div>
     </div>
 </div>

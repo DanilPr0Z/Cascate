@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ category.name }} - Cascate Porte{% endblock %}
+{% block title %}{{ category.name }} Cascate Porte{% endblock %}
 
 {% block breadcrumbs_content %}
     <span class="separator">></span>
@@ -19,12 +19,7 @@
     <div class="container">
         <div class="category-header">
             <h1 class="page-title">{{ category.name }}</h1>
-            <p class="products-count">{{ products.count }} товаров</p>
-        </div>
-
-        <div class="category-content">
-            <!-- Products Grid -->
-            <div class="products-section">
+            <div class="header-right">
                 <div class="products-toolbar">
                     <form method="get" style="display: inline;">
                         {% for filter in current_filters %}
@@ -44,6 +39,13 @@
                         </select>
                     </form>
                 </div>
+                <p class="products-count">{{ products.count }} товаров</p>
+            </div>
+        </div>
+
+        <div class="category-content">
+            <!-- Products Grid -->
+            <div class="products-section">
 
                 <div class="products-grid">
                     {% for product in products %}
@@ -73,10 +75,8 @@
                             </div>
                             
                             <div class="product-availability">
-                                {% if product.availability == 'in_stock' %}
                                 <span class="availability-dot in-stock"></span>
                                 <span>В наличии</span>
-                                {% endif %}
                             </div>
                         </div>
                         <div class="product-info">

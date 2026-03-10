@@ -131,7 +131,7 @@ class Product(models.Model):
     filter_values = models.ManyToManyField(FilterValue, blank=True, verbose_name="Фильтры")
     
     # Статусы
-    availability = models.CharField(max_length=20, choices=AVAILABILITY_CHOICES, default='in_stock', verbose_name="Наличие")
+    availability = models.CharField(max_length=20, choices=AVAILABILITY_CHOICES, blank=True, null=True, verbose_name="Наличие")
     is_new = models.BooleanField(default=False, verbose_name="Новинка")
     is_popular = models.BooleanField(default=False, verbose_name="Популярный")
     

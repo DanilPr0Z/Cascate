@@ -189,6 +189,28 @@
     margin-bottom: 20px;
 }
 
+/* Простой блок наличия */
+.product-availability-simple {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 0;
+    background-color: transparent;
+    font-size: 15px;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+.product-availability-simple .availability-dot {
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+
+.product-availability-simple .availability-locations {
+    margin-left: 4px;
+    color: var(--text-light);
+}
+
 .availability-dot {
     width: 8px;
     height: 8px;
@@ -200,7 +222,7 @@
     background-color: #2ABB7F;
 }
 
-/* Магазины */
+/* Магазины (старый вариант - оставлен для обратной совместимости) */
 .product-stores {
     margin-top: 15px;
     display: flex;

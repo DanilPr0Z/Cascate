@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Cascate Porte - Дизайнерская мебель{% endblock %}</title>
+    <title>{% block title %}Cascate Porte Дизайнерская мебель{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
@@ -12,36 +13,31 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Main Navigation -->
+    <!-- Main Navigation - Vertical Sidebar -->
     <div class="main-nav">
-        <div class="container">
-            <div class="nav-left">
-                <a href="https://cascate.ru" class="logo">
-                    <img src="{% static 'images/logo-navbar.png' %}" alt="Cascate Porte e mobile" class="logo-image">
-                </a>
-                <a href="{% url 'catalog:catalog' %}" class="catalog-btn">
-                    <svg class="hamburger" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                    Каталог
-                </a>
-            </div>
-            <div class="nav-right">
-                <a href="{% url 'cart:cart' %}" class="nav-icon cart-icon" title="Корзина">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                    </svg>
-                    {% if cart_count > 0 %}
-                    <span class="cart-badge">{{ cart_count }}</span>
-                    {% endif %}
-                </a>
-            </div>
+        <div class="nav-top">
+            <a href="https://cascate.ru" class="logo">
+                <img src="{% static 'images/logo-navbar.png' %}" alt="Cascate Porte e mobile" class="logo-image">
+            </a>
+        </div>
+
+        <div class="nav-middle">
+        </div>
+
+        <div class="nav-bottom">
+            <a href="{% url 'cart:cart' %}" class="nav-icon cart-icon" title="Корзина">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                {% if cart_count > 0 %}
+                <span class="cart-badge">{{ cart_count }}</span>
+                {% endif %}
+            </a>
         </div>
     </div>
+
 
     <!-- Secondary Navigation Wrapper -->
     <div class="secondary-nav-wrapper">

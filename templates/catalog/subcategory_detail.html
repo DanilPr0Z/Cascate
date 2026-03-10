@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ subcategory.name }} - {{ category.name }} - Cascate Porte{% endblock %}
+{% block title %}{{ subcategory.name }} {{ category.name }} Cascate Porte{% endblock %}
 
 {% block breadcrumbs_content %}
     <span class="separator">></span>
@@ -68,10 +68,8 @@
                             </div>
                             
                             <div class="product-availability">
-                                {% if product.availability == 'in_stock' %}
                                 <span class="availability-dot in-stock"></span>
                                 <span>В наличии</span>
-                                {% endif %}
                             </div>
                         </div>
                         <div class="product-info">

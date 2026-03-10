@@ -1,17 +1,19 @@
 .category-page {
-    padding: 30px 0;
+    padding: 0 0 30px 0;
+    margin-top: -22px;
 }
 
 .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 
 .products-count {
     font-size: 16px;
     color: var(--text-light);
+    white-space: nowrap;
 }
 
 .category-content {
@@ -26,8 +28,6 @@
 
 .products-toolbar {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
 }
 
 .sort-select {
@@ -49,6 +49,7 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 30px;
     align-items: start;
+    margin-top: 0;
 }
 
 .product-card {
@@ -329,3 +330,14 @@
     }
 }
 
+
+.category-header .page-title {
+    white-space: nowrap;
+    margin-bottom: 0;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1cm;
+}

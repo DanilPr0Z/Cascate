@@ -150,54 +150,73 @@ Mebel/
 
 ## Подготовка к продакшену
 
+### Быстрый старт
+
+Проект полностью настроен для продакшен развертывания. См. подробную инструкцию в [DEPLOY.md](DEPLOY.md)
+
 ### 1. Настройте переменные окружения
 
-Создайте файл `.env` или настройте переменные на сервере:
+Скопируйте `.env.example` в `.env` и заполните значения:
 
-```python
+```bash
+cp .env.example .env
+nano .env
+```
+
+Основные переменные:
+```env
 DEBUG=False
-SECRET_KEY='ваш-новый-безопасный-секретный-ключ'
-ALLOWED_HOSTS=ваш-домен.ru,www.ваш-домен.ru
+SECRET_KEY='сгенерируйте-уникальный-ключ'
+ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+
+# Database (PostgreSQL рекомендуется)
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=mebel_db
+DB_USER=mebel_user
+DB_PASSWORD=strong_password
+
+# Email
+EMAIL_HOST=smtp.gmail.com
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=app-password
 ```
 
-### 2. Обновите settings.py
+### 2. Технологический стек для продакшена
 
-```python
-DEBUG = False
-ALLOWED_HOSTS = ['ваш-домен.ru', 'www.ваш-домен.ru']
-SECRET_KEY = os.environ.get('SECRET_KEY')
-```
+- **Веб-сервер**: Nginx (конфиг в `deployment/nginx.conf`)
+- **WSGI-сервер**: Gunicorn (конфиг в `gunicorn_config.py`)
+- **Process Manager**: systemd (сервисы в `deployment/`)
+- **База данных**: PostgreSQL 14+
+- **SSL**: Let's Encrypt (certbot)
+- **Static Files**: WhiteNoise
 
-### 3. Соберите статические файлы
+### 3. Файлы конфигурации
 
-```bash
-python manage.py collectstatic
-```
+Все готовые конфигурации находятся в директории `deployment/`:
+- `nginx.conf` - конфигурация Nginx с SSL
+- `mebel.service` - systemd сервис для Gunicorn
+- `mebel-cron.service` / `mebel-cron.timer` - автоматические задачи
 
-### 4. Настройте production сервер
+### 4. Безопасность
 
-Рекомендуемый стек:
-- **Веб-сервер**: Nginx
-- **WSGI-сервер**: Gunicorn или uWSGI
-- **База данных**: PostgreSQL (для высокой нагрузки)
+Проект включает:
+- HTTPS redirect
+- HSTS headers
+- CSRF protection
+- XSS protection
+- Secure cookies
+- Content Security Policy
 
-```bash
-# Установка Gunicorn
-pip install gunicorn
+### 5. Checklist перед деплоем
 
-# Запуск
-gunicorn mebel.wsgi:application --bind 0.0.0.0:8000
-```
+См. [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) для полного списка проверок перед развертыванием.
 
-### 5. Создайте резервную копию БД
+### 6. Мониторинг
 
-```bash
-# Для SQLite
-cp db.sqlite3 db.sqlite3.backup
-
-# Для PostgreSQL
-pg_dump dbname > backup.sql
-```
+Логи находятся в:
+- `/var/www/mebel/logs/gunicorn_*.log` - логи Gunicorn
+- `/var/www/mebel/logs/django_errors.log` - логи Django
+- `/var/log/nginx/mebel_*.log` - логи Nginx
 
 ## Внешние ссылки
 
