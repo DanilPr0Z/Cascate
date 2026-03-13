@@ -10,9 +10,57 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/burger-menu.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Burger Menu -->
+    <div class="site-burger-menu">
+        <input id="menu__toggle" type="checkbox">
+
+        <div class="site-logo">
+            <a class="link-logo" href="http://cascate.ru/"></a>
+        </div>
+
+        <div class="burger-button-wrapper">
+            <label class="menu__btn" for="menu__toggle">
+                <span></span>
+            </label>
+        </div>
+
+        <div class="spacer"></div>
+
+        <ul class="menu__box">
+            <li><a class="menu__item" href="/">Главная</a></li>
+            <li><a class="menu__item" href="http://cascate.ru/page/company/">О фабрике</a></li>
+            <li><a class="menu__item" href="http://cascate.ru/news/">Новости</a></li>
+            <li id="product"><a class="menu__item" href="http://cascate.ru/products/">Продукция</a>
+                <ul class="submenu">
+                    <li id="product1">
+                        <a class="menu__item" href="http://cascate.ru/products/?id_category=1">ДВЕРИ</a>
+                    </li>
+                    <li style="font-size: 18px; text-align: left; color: #c9002b;">Двери с наличниками, без наличников, раздвижные.</li>
+                    <li>
+                        <a class="menu__item" href="http://cascate.ru/products/?id_category=4">ЗОНИРОВАНИЕ ПРОСТРАНСТВА</a>
+                    </li>
+                    <li style="font-size: 18px; text-align: left; color: #c9002b;">Стационарные перегородки</li>
+                    <li id="product2">
+                        <a class="menu__item" href="http://cascate.ru/products/?id_category=3">СИСТЕМЫ ХРАНЕНИЯ</a>
+                    </li>
+                    <li style="font-size: 18px; text-align: left; color: #c9002b;">Гардеробные и места для хранения</li>
+                    <li><a class="menu__item" href="http://cascate.ru/products/19/">ДИЗАЙНЕРСКИЕ СТЕНОВЫЕ ПАНЕЛИ </a></li>
+                    <li style="font-size: 18px; text-align: left; color: #c9002b;">Стеновые панели</li>
+                    <li id="product3">
+                        <a class="menu__item" href="http://cascate.ru/products/?id_category=17">МЕБЕЛЬ</a>
+                    </li>
+                </ul>
+            </li>
+            <li><a class="menu__item" href="http://cascate.ru/login/">Личный кабинет</a></li>
+            <li><a class="menu__item" href="http://cascate.ru/contacts/">Контакты</a></li>
+            <li><a class="menu__item" href="http://cascate.ru/page/downloads/">Каталоги</a></li>
+            <li><a class="menu__item" target="_blank" href="https://sale.cascate.ru">Распродажа</a></li>
+        </ul>
+    </div>
     <!-- Main Navigation - Vertical Sidebar -->
     <div class="main-nav">
         <div class="nav-top">
@@ -153,6 +201,7 @@
     </footer>
 
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/burger-menu.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

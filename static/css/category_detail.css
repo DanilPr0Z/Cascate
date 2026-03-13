@@ -28,6 +28,14 @@
 
 .products-toolbar {
     display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .sort-select {
