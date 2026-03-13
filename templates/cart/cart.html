@@ -167,38 +167,20 @@
                 <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
         </button>
-        <h3>Оформление заказа</h3>
-        <p>Пожалуйста, заполните ваши данные для оформления заказа</p>
-        <form id="orderForm" method="post" action="{% url 'cart:submit_order' %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="firstName">Имя *</label>
-                <input type="text" id="firstName" name="first_name" required>
-            </div>
-            <div class="form-group">
-                <label for="lastName">Фамилия *</label>
-                <input type="text" id="lastName" name="last_name" required>
-            </div>
-            <div class="form-group">
-                <label for="phone">Номер телефона *</label>
-                <input type="tel" id="phone" name="phone" required placeholder="+7 (___) ___-__-__">
-            </div>
-            <div class="form-group">
-                <label for="email">Email (необязательно)</label>
-                <input type="email" id="email" name="email" placeholder="example@mail.ru">
-            </div>
-            <div class="modal-actions">
-                <button type="submit" class="btn-confirm">Отправить заказ</button>
-                <button type="button" id="cancelOrder" class="btn-cancel">Отмена</button>
-            </div>
-        </form>
-        <div id="orderSuccess" class="order-success" style="display: none;">
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        <div class="coming-soon-message" style="text-align: center; padding: 40px 20px;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 20px; color: #444;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <h4>Заказ успешно отправлен!</h4>
-            <p>Заказ отправлен на почту. Мы свяжемся с вами в ближайшее время.</p>
+            <h3 style="margin-bottom: 15px; color: #333;">Оформление заказа</h3>
+            <p style="font-size: 16px; color: #666; margin-bottom: 10px;">Данная функция появится в ближайшее время</p>
+            <p style="font-size: 14px; color: #999;">Пока вы можете скачать заказ в PDF и связаться с нами напрямую</p>
+            <div style="margin-top: 30px;">
+                <a href="{% url 'cart:download_order' %}" class="btn-confirm" style="display: inline-block; text-decoration: none; margin-right: 10px;">
+                    Скачать PDF
+                </a>
+                <button type="button" id="cancelOrder" class="btn-cancel">Закрыть</button>
+            </div>
         </div>
     </div>
 </div>
