@@ -35,6 +35,7 @@ def generate_order_pdf(cart, customer_info=None):
     """Генерация PDF с заказом"""
     from reportlab.lib.enums import TA_CENTER, TA_LEFT
     from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.platypus import Image
     import os
 
     buffer = BytesIO()
@@ -111,8 +112,19 @@ def generate_order_pdf(cart, customer_info=None):
         alignment=TA_LEFT,
     )
 
+    # Логотип в левом верхнем углу
+    try:
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'logo-navbar.png')
+        if os.path.exists(logo_path):
+            logo = Image(logo_path, width=6*cm, height=1.4*cm)
+            logo.hAlign = 'LEFT'
+            elements.append(logo)
+            elements.append(Spacer(1, 0.8*cm))
+    except Exception as e:
+        print(f"[WARNING] Could not add logo to PDF: {e}")
+
     # Заголовок
-    title = Paragraph('Заказ Cascate Porte', title_style)
+    title = Paragraph('Заказ', title_style)
     elements.append(title)
     elements.append(Spacer(1, 0.5*cm))
 
@@ -136,16 +148,32 @@ def generate_order_pdf(cart, customer_info=None):
         elements.append(Spacer(1, 0.5*cm))
 
     # Таблица с товарами
-    cart_items = cart.items.select_related('product').all()
+    cart_items = cart.items.select_related('product').prefetch_related('product__images').all()
 
     # Данные таблицы
-    data = [['№', 'Товар', 'Цена', 'Кол-во', 'Итого']]
+    data = [['№', 'Фото', 'Товар', 'Цена', 'Кол-во', 'Итого']]
 
     for idx, item in enumerate(cart_items, 1):
-        product_name = item.product.name[:50] if len(item.product.name) <= 50 else item.product.name[:47] + '...'
+        product_name = item.product.name[:40] if len(item.product.name) <= 40 else item.product.name[:37] + '...'
+
+        # Получаем главное изображение товара
+        product_image = None
+        main_image = item.product.get_main_image()
+        if main_image:
+            try:
+                image_path = os.path.join(settings.MEDIA_ROOT, str(main_image.image))
+                if os.path.exists(image_path):
+                    product_image = Image(image_path, width=1.5*cm, height=1.5*cm)
+            except Exception as e:
+                print(f"[WARNING] Could not load product image: {e}")
+
+        # Если изображение не найдено, используем заглушку
+        if not product_image:
+            product_image = Paragraph('—', normal_style)
 
         data.append([
             str(idx),
+            product_image,
             product_name,
             f"{item.product.price:.0f} ₽",
             str(item.quantity),
@@ -153,30 +181,33 @@ def generate_order_pdf(cart, customer_info=None):
         ])
 
     # Итоговая строка
-    data.append(['', '', '', 'Итого:', f"{cart.get_total_price():.0f} ₽"])
+    data.append(['', '', '', '', 'Итого:', f"{cart.get_total_price():.0f} ₽"])
 
     # Создаем таблицу
-    table = Table(data, colWidths=[1.5*cm, 9*cm, 2.5*cm, 2*cm, 2.5*cm])
+    table = Table(data, colWidths=[1*cm, 2*cm, 7*cm, 2.5*cm, 1.5*cm, 2.5*cm])
 
     # Стиль таблицы
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#444444')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (0, -1), 'CENTER'),  # Первая колонка (№) - по центру
-        ('ALIGN', (1, 0), (1, -1), 'LEFT'),     # Вторая колонка (Товар) - слева
-        ('ALIGN', (2, 0), (-1, -1), 'CENTER'),  # Остальные - по центру
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),  # Вторая колонка (Фото) - по центру
+        ('ALIGN', (2, 0), (2, -1), 'LEFT'),    # Третья колонка (Товар) - слева
+        ('ALIGN', (3, 0), (-1, -1), 'CENTER'), # Остальные - по центру
         ('FONTNAME', (0, 0), (-1, 0), font_name_bold),
-        ('FONTSIZE', (0, 0), (-1, 0), 11),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('TOPPADDING', (0, 0), (-1, 0), 12),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
         ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#F5F5F5')),
         ('FONTNAME', (0, -1), (-1, -1), font_name_bold),
         ('FONTNAME', (0, 1), (-1, -2), font_name),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('LEFTPADDING', (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('LEFTPADDING', (0, 0), (-1, -1), 4),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
     ]))
 
     elements.append(table)
@@ -353,36 +384,41 @@ Email: {customer_info.get('email', 'Не указан')}
 Cascate Porte
     """
 
-    # Отправка email отключена
-    # try:
-    #     email = EmailMessage(
-    #         subject=subject,
-    #         body=message,
-    #         from_email=settings.DEFAULT_FROM_EMAIL,
-    #         to=['store@cascate.ru'],  # Email из футера
-    #     )
-    #
-    #     # Прикрепляем PDF
-    #     email.attach(
-    #         f'Заказ_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
-    #         pdf_buffer.getvalue(),
-    #         'application/pdf'
-    #     )
-    #
-    #     email.send(fail_silently=False)
-    #
-    #     return JsonResponse({
-    #         'success': True,
-    #         'message': 'Заказ успешно оформлен и отправлен!'
-    #     })
-    # except Exception as e:
-    #     print(f"[ERROR] Failed to send email: {e}")
-    #     return JsonResponse({
-    #         'success': False,
-    #         'message': 'Ошибка при отправке заказа. Попробуйте позже.'
-    #     })
+    # Отправка email
+    try:
+        email = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=['store@cascate.ru'],
+            reply_to=[customer_info.get('email')] if customer_info.get('email') else None,
+        )
 
-    return JsonResponse({
-        'success': True,
-        'message': 'Заказ успешно оформлен!'
-    })
+        # Добавляем заголовки для надежности
+        email.extra_headers = {
+            'X-Mailer': 'Cascate Porte',
+            'X-Priority': '3',
+        }
+
+        # Прикрепляем PDF
+        email.attach(
+            f'Заказ_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+            pdf_buffer.getvalue(),
+            'application/pdf'
+        )
+
+        email.send(fail_silently=False)
+
+        # Очищаем корзину после успешной отправки
+        cart.items.all().delete()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Заказ успешно оформлен и отправлен!'
+        })
+    except Exception as e:
+        print(f"[ERROR] Failed to send email: {e}")
+        return JsonResponse({
+            'success': False,
+            'message': f'Ошибка при отправке заказа: {str(e)}'
+        })

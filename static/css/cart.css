@@ -663,6 +663,26 @@
     border-color: var(--primary-color);
 }
 
+.form-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+    font-family: "PT Sans", Arial, Helvetica, sans-serif;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-input::placeholder {
+    color: #999;
+}
+
 /* Сообщение об успехе */
 .order-success {
     text-align: center;
