@@ -1,0 +1,15 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'admin:catalog_product_download_template' %}" class="button" style="background-color: #20B2AA; color: white; padding: 10px 15px; border-radius: 4px; text-decoration: none; font-weight: 500;">
+            📄 Скачать шаблон Excel
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'admin:catalog_product_import_excel' %}" class="button" style="background-color: #2c5f2d; color: white; padding: 10px 15px; border-radius: 4px; text-decoration: none; font-weight: 500;">
+            📥 Импорт из Excel
+        </a>
+    </li>
+{% endblock %}

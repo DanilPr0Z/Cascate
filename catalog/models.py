@@ -119,8 +119,9 @@ class Product(models.Model):
     subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='products', verbose_name="Подкатегория")
     name = models.CharField(max_length=500, verbose_name="Название")
     slug = models.SlugField(max_length=500, unique=True, verbose_name="URL")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
-    
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена данной модели")
+    price_from = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Цена от")
+
     # Основная информация
     country = models.CharField(max_length=100, blank=True, verbose_name="Страна")
     materials = models.CharField(max_length=500, blank=True, verbose_name="Материалы")

@@ -151,10 +151,15 @@ def generate_order_pdf(cart, customer_info=None):
     cart_items = cart.items.select_related('product').prefetch_related('product__images').all()
 
     # Данные таблицы
-    data = [['№', 'Фото', 'Товар', 'Цена', 'Кол-во', 'Итого']]
+    data = [['№', 'Фото', 'Товар', 'Материалы', 'Цена', 'Кол-во', 'Итого']]
 
     for idx, item in enumerate(cart_items, 1):
         product_name = item.product.name[:40] if len(item.product.name) <= 40 else item.product.name[:37] + '...'
+
+        # Материалы товара
+        materials = item.product.materials if item.product.materials else '—'
+        if len(materials) > 30:
+            materials = materials[:27] + '...'
 
         # Получаем главное изображение товара
         product_image = None
@@ -175,16 +180,18 @@ def generate_order_pdf(cart, customer_info=None):
             str(idx),
             product_image,
             product_name,
+            materials,
             f"{item.product.price:.0f} ₽",
             str(item.quantity),
             f"{item.get_total_price():.0f} ₽"
         ])
 
     # Итоговая строка
-    data.append(['', '', '', '', 'Итого:', f"{cart.get_total_price():.0f} ₽"])
+    total_items = cart.get_total_items()
+    data.append(['', '', '', '', 'Итого:', f"{total_items} шт", f"{cart.get_total_price():.0f} ₽"])
 
     # Создаем таблицу
-    table = Table(data, colWidths=[1*cm, 2*cm, 7*cm, 2.5*cm, 1.5*cm, 2.5*cm])
+    table = Table(data, colWidths=[0.8*cm, 1.8*cm, 5*cm, 3*cm, 2*cm, 1.2*cm, 2.2*cm])
 
     # Стиль таблицы
     table.setStyle(TableStyle([
@@ -193,9 +200,10 @@ def generate_order_pdf(cart, customer_info=None):
         ('ALIGN', (0, 0), (0, -1), 'CENTER'),  # Первая колонка (№) - по центру
         ('ALIGN', (1, 0), (1, -1), 'CENTER'),  # Вторая колонка (Фото) - по центру
         ('ALIGN', (2, 0), (2, -1), 'LEFT'),    # Третья колонка (Товар) - слева
-        ('ALIGN', (3, 0), (-1, -1), 'CENTER'), # Остальные - по центру
+        ('ALIGN', (3, 0), (3, -1), 'LEFT'),    # Четвертая колонка (Материалы) - слева
+        ('ALIGN', (4, 0), (-1, -1), 'CENTER'), # Остальные - по центру
         ('FONTNAME', (0, 0), (-1, 0), font_name_bold),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
         ('TOPPADDING', (0, 0), (-1, 0), 10),
         ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#F5F5F5')),
@@ -203,9 +211,9 @@ def generate_order_pdf(cart, customer_info=None):
         ('FONTNAME', (0, 1), (-1, -2), font_name),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
         ('TOPPADDING', (0, 1), (-1, -1), 6),
         ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
     ]))
