@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.middleware.csrf import get_token
-from .models import Category, SubCategory, Product, ProductImage, FilterCategory, FilterValue, Store, ProductStock, ProductRating
+from .models import Category, SubCategory, Product, ProductImage, Store, ProductStock, ProductRating
 import os
 
 
@@ -56,33 +56,6 @@ class SubCategoryAdmin(admin.ModelAdmin):
     view_on_site.short_description = "Просмотр"
 
 
-@admin.register(FilterCategory)
-class FilterCategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'order', 'values_count']
-    list_editable = ['order']
-    prepopulated_fields = {'slug': ('name',)}
-    search_fields = ['name']
-    list_per_page = 25
-    
-    def values_count(self, obj):
-        count = obj.values.count()
-        return format_html('<span style="background: #20B2AA; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">{} значений</span>', count)
-    values_count.short_description = "Количество значений"
-
-
-@admin.register(FilterValue)
-class FilterValueAdmin(admin.ModelAdmin):
-    list_display = ['name', 'filter_category', 'products_count']
-    list_filter = ['filter_category']
-    prepopulated_fields = {'slug': ('name',)}
-    search_fields = ['name']
-    list_per_page = 25
-    
-    def products_count(self, obj):
-        count = Product.objects.filter(filter_values=obj).count()
-        return count
-    products_count.short_description = "Товаров"
-
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
@@ -106,11 +79,11 @@ class ProductStockInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['image_preview', 'name', 'category', 'price_formatted', 'availability_badge', 'is_new_display', 'created_at', 'view_on_site']
-    list_filter = ['category', 'subcategory', 'availability', 'is_new', 'is_popular', 'filter_values', 'created_at']
+    list_display = ['image_preview', 'name', 'category', 'price_formatted', 'discount_badge', 'availability_badge', 'is_new_display', 'created_at', 'view_on_site']
+    list_filter = ['category', 'subcategory', 'availability', 'is_new', 'is_popular', 'created_at']
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name', 'product_number', 'description', 'slug']
-    filter_horizontal = ['filter_values']
+    actions = ['assign_to_store']
     inlines = [ProductImageInline, ProductStockInline]
     list_per_page = 25
     list_display_links = ['name']
@@ -125,7 +98,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'slug', 'category', 'subcategory', 'price', 'price_from'),
+            'fields': ('name', 'slug', 'category', 'subcategory', 'price', 'price_from', 'discount'),
             'classes': ('wide',)
         }),
         ('Характеристики товара', {
@@ -136,7 +109,7 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('wide',)
         }),
         ('Фильтры и статусы', {
-            'fields': ('filter_values', 'availability', 'is_new', 'is_popular'),
+            'fields': ('availability', 'is_new', 'is_popular'),
         }),
         ('QR код и карточка товара', {
             'fields': ('qr_code', 'qr_code_preview', 'product_card_preview', 'generate_card_button'),
@@ -168,8 +141,102 @@ class ProductAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.import_excel_view),
                 name='catalog_product_import_excel',
             ),
+            path(
+                'assign-to-store/',
+                self.admin_site.admin_view(self.assign_to_store_view),
+                name='catalog_product_assign_to_store',
+            ),
         ]
         return custom_urls + urls
+
+    def assign_to_store(self, request, queryset):
+        """Действие: перенаправить на страницу выбора магазина"""
+        from django.http import HttpResponseRedirect
+        selected_ids = ','.join(str(obj.pk) for obj in queryset)
+        return HttpResponseRedirect(
+            f'/admin/catalog/product/assign-to-store/?ids={selected_ids}'
+        )
+    assign_to_store.short_description = "Добавить выбранные в магазин"
+
+    def assign_to_store_view(self, request):
+        """Промежуточная страница выбора магазина для добавления товаров"""
+        from django.http import HttpResponseRedirect
+        from django.middleware.csrf import get_token
+
+        if request.method == 'POST':
+            ids_raw = request.POST.get('ids', '')
+            store_id = request.POST.get('store_id')
+            if ids_raw and store_id:
+                try:
+                    store = Store.objects.get(pk=store_id, is_active=True)
+                    product_ids = [int(i) for i in ids_raw.split(',') if i.strip().isdigit()]
+                    products = Product.objects.filter(pk__in=product_ids)
+                    added = 0
+                    for product in products:
+                        _, created = ProductStock.objects.get_or_create(
+                            product=product,
+                            store=store,
+                            defaults={'quantity': 1}
+                        )
+                        if created:
+                            added += 1
+                    skipped = len(product_ids) - added
+                    msg = f'Добавлено {added} товаров в магазин "{store.name}".'
+                    if skipped:
+                        msg += f' Пропущено {skipped} (уже были в магазине).'
+                    self.message_user(request, msg)
+                except Store.DoesNotExist:
+                    self.message_user(request, 'Магазин не найден.', level='error')
+            return HttpResponseRedirect('/admin/catalog/product/')
+
+        # GET — показываем форму
+        ids_raw = request.GET.get('ids', '')
+        product_ids = [int(i) for i in ids_raw.split(',') if i.strip().isdigit()]
+        product_count = len(product_ids)
+        stores = Store.objects.filter(is_active=True)
+        csrf_token = get_token(request)
+
+        store_options = ''.join(
+            f'<option value="{s.pk}">{s.name}</option>' for s in stores
+        )
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Добавить товары в магазин</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }}
+                h1 {{ color: #444; font-size: 22px; margin-bottom: 20px; }}
+                .info {{ background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px; }}
+                select {{ width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;
+                          font-size: 14px; margin: 10px 0 20px 0; }}
+                button {{ background: #444; color: white; padding: 12px 24px; border: none;
+                          border-radius: 4px; cursor: pointer; font-size: 15px; font-weight: 500; }}
+                button:hover {{ background: #333; }}
+                .back-link {{ display: inline-block; margin-top: 15px; color: #444;
+                               text-decoration: none; font-size: 14px; }}
+                .back-link:hover {{ text-decoration: underline; }}
+            </style>
+        </head>
+        <body>
+            <h1>Добавить товары в магазин</h1>
+            <div class="info">Выбрано товаров: <strong>{product_count}</strong></div>
+            <form method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+                <input type="hidden" name="ids" value="{ids_raw}">
+                <label for="store_id"><strong>Выберите магазин:</strong></label>
+                <select name="store_id" id="store_id" required>
+                    <option value="">— выберите магазин —</option>
+                    {store_options}
+                </select>
+                <button type="submit">Добавить в магазин</button>
+            </form>
+            <a href="/admin/catalog/product/" class="back-link">← Вернуться к товарам</a>
+        </body>
+        </html>
+        """
+        return HttpResponse(html)
 
     def download_template_view(self, request):
         """Скачать шаблон Excel для импорта товаров"""
@@ -448,169 +515,9 @@ class ProductAdmin(admin.ModelAdmin):
             return JsonResponse({'success': False, 'error': f'{str(e)}'}, status=500)
 
     def _generate_product_card(self, product, output_dir):
-        """Генерирует карточку товара (копия логики из команды)"""
-        from PIL import Image, ImageDraw, ImageFont
-        import qrcode
-
-        # Размеры карточки - компактная визитка (90x50 мм при 300 DPI)
-        width = 1000
-        height = 700
-
-        # Создаем белый фон
-        card = Image.new('RGB', (width, height), 'white')
-        draw = ImageDraw.Draw(card)
-
-        # Загружаем шрифты
-        try:
-            font_paths = [
-                os.path.join(settings.BASE_DIR, 'static', 'fonts', 'DejaVuSans.ttf'),
-                os.path.join(settings.BASE_DIR, 'static', 'fonts', 'DejaVuSans-Bold.ttf'),
-                '/System/Library/Fonts/Supplemental/Arial Unicode.ttf',
-                '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-            ]
-
-            font_regular = None
-            for font_path in font_paths:
-                if os.path.exists(font_path):
-                    try:
-                        font_regular = ImageFont.truetype(font_path, 24)
-                        font_bold = ImageFont.truetype(font_path, 32)
-                        font_medium = ImageFont.truetype(font_path, 22)
-                        font_small = ImageFont.truetype(font_path, 20)
-                        font_price = ImageFont.truetype(font_path, 40)
-                        break
-                    except:
-                        continue
-
-            if not font_regular:
-                font_regular = ImageFont.load_default()
-                font_bold = ImageFont.load_default()
-                font_medium = ImageFont.load_default()
-                font_small = ImageFont.load_default()
-                font_price = ImageFont.load_default()
-
-        except Exception as e:
-            font_regular = ImageFont.load_default()
-            font_bold = ImageFont.load_default()
-            font_medium = ImageFont.load_default()
-            font_small = ImageFont.load_default()
-            font_price = ImageFont.load_default()
-
-        # Добавляем логотип в верхний левый угол
-        logo_height_final = 0
-        try:
-            logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'logo-navbar.png')
-            if os.path.exists(logo_path):
-                logo = Image.open(logo_path)
-                logo_width = 200
-                logo_height = int(logo.height * (logo_width / logo.width))
-                logo = logo.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
-                card.paste(logo, (30, 30), logo if logo.mode == 'RGBA' else None)
-                logo_height_final = logo_height
-        except:
-            pass
-
-        # Название товара (под логотипом, слева)
-        y_offset = max(100, logo_height_final + 60)
-        name_lines = self._wrap_text(product.name, font_bold, width - 60)
-        for line in name_lines[:2]:  # Максимум 2 строки
-            draw.text((30, y_offset), line, fill='black', font=font_bold)
-            y_offset += 40
-
-        y_offset += 30
-
-        # Генерируем QR-код
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_M,
-            box_size=8,
-            border=1,
-        )
-
-        product_url = f"https://cascateporte.ru{product.get_absolute_url()}"
-        qr.add_data(product_url)
-        qr.make(fit=True)
-
-        qr_img = qr.make_image(fill_color="black", back_color="white")
-        qr_size = 350
-        qr_img = qr_img.resize((qr_size, qr_size), Image.Resampling.LANCZOS)
-
-        # QR-код слева
-        qr_x = 30
-        qr_y = y_offset
-        card.paste(qr_img, (qr_x, qr_y))
-
-        # Информация справа от QR
-        info_x = qr_x + qr_size + 40
-        info_y = y_offset
-        line_height = 35
-
-        # Материалы
-        if product.materials:
-            draw.text((info_x, info_y), "Материалы:", fill='#666666', font=font_medium)
-            info_y += line_height
-            materials_lines = self._wrap_text(product.materials, font_small, width - info_x - 30)
-            for line in materials_lines[:2]:  # Максимум 2 строки
-                draw.text((info_x, info_y), line, fill='black', font=font_small)
-                info_y += 30
-            info_y += 10
-
-        # Размеры
-        if product.dimensions:
-            draw.text((info_x, info_y), "Размеры:", fill='#666666', font=font_medium)
-            info_y += line_height
-            draw.text((info_x, info_y), product.dimensions, fill='black', font=font_small)
-            info_y += line_height + 10
-
-        # Страна
-        if product.country:
-            draw.text((info_x, info_y), "Страна:", fill='#666666', font=font_medium)
-            info_y += line_height
-            draw.text((info_x, info_y), product.country, fill='black', font=font_small)
-            info_y += line_height + 20
-
-        # Цена справа (жирным, зеленым)
-        price_text = f"{int(product.price)} ₽"
-        draw.text((info_x, info_y), price_text, fill='#2c5f2d', font=font_price)
-        info_y += 50
-
-        # Цена от (если указана)
-        if product.price_from:
-            price_from_text = f"Цена от {int(product.price_from)} ₽"
-            draw.text((info_x, info_y), price_from_text, fill='#666666', font=font_small)
-
-        # Сохраняем
-        filename = f'card_{product.slug}.png'
-        filepath = os.path.join(output_dir, filename)
-        card.save(filepath, 'PNG', quality=95)
-
-        return filepath
-
-    def _wrap_text(self, text, font, max_width):
-        """Разбивает текст на строки"""
-        from PIL import Image, ImageDraw
-
-        words = text.split()
-        lines = []
-        current_line = []
-
-        for word in words:
-            test_line = ' '.join(current_line + [word])
-            temp_draw = ImageDraw.Draw(Image.new('RGB', (1, 1)))
-            bbox = temp_draw.textbbox((0, 0), test_line, font=font)
-            width = bbox[2] - bbox[0]
-
-            if width <= max_width:
-                current_line.append(word)
-            else:
-                if current_line:
-                    lines.append(' '.join(current_line))
-                current_line = [word]
-
-        if current_line:
-            lines.append(' '.join(current_line))
-
-        return lines if lines else [text]
+        """Генерирует карточку товара через label_generator."""
+        from catalog.label_generator import generate_product_card
+        return generate_product_card(product, output_dir)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """Фильтрация подкатегорий по выбранной категории"""
@@ -633,9 +540,30 @@ class ProductAdmin(admin.ModelAdmin):
     image_preview.short_description = "Изображение"
     
     def price_formatted(self, obj):
-        return format_html('<strong style="color: #20B2AA;">{:,} ₽</strong>'.format(int(obj.price)).replace(',', ' '))
+        if obj.discount:
+            discounted = obj.price * (100 - obj.discount) / 100
+            return format_html(
+                '<span style="text-decoration:line-through;color:#999;font-size:11px;">{} ₽</span>'
+                '&nbsp;<strong style="color:#e53935;">{} ₽</strong>',
+                '{:,}'.format(int(obj.price)).replace(',', '\u202f'),
+                '{:,}'.format(int(discounted)).replace(',', '\u202f'),
+            )
+        return format_html(
+            '<strong style="color: #20B2AA;">{} ₽</strong>',
+            '{:,}'.format(int(obj.price)).replace(',', '\u202f'),
+        )
     price_formatted.short_description = "Цена"
     price_formatted.admin_order_field = 'price'
+
+    def discount_badge(self, obj):
+        if obj.discount:
+            return format_html(
+                '<span style="background:#e53935;color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;">-{}%</span>',
+                obj.discount,
+            )
+        return '—'
+    discount_badge.short_description = "Скидка"
+    discount_badge.admin_order_field = 'discount'
     
     def availability_badge(self, obj):
         colors = {
@@ -762,7 +690,7 @@ class StoreAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'address', 'phone', 'email'),
+            'fields': ('name', 'address', 'phone', 'email', 'add_all_products_button'),
         }),
         ('Дополнительно', {
             'fields': ('working_hours', 'is_active'),
@@ -772,7 +700,100 @@ class StoreAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'add_all_products_button']
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<int:store_id>/add-all-products/',
+                self.admin_site.admin_view(self.add_all_products_view),
+                name='catalog_store_add_all_products',
+            ),
+        ]
+        return custom_urls + urls
+
+    def add_all_products_view(self, request, store_id):
+        """Добавить все товары в магазин"""
+        from django.http import HttpResponseRedirect
+        from django.middleware.csrf import get_token
+
+        try:
+            store = Store.objects.get(pk=store_id)
+        except Store.DoesNotExist:
+            self.message_user(request, 'Магазин не найден.', level='error')
+            return HttpResponseRedirect('/admin/catalog/store/')
+
+        if request.method == 'POST':
+            all_products = Product.objects.all()
+            added = 0
+            for product in all_products:
+                _, created = ProductStock.objects.get_or_create(
+                    product=product,
+                    store=store,
+                    defaults={'quantity': 1}
+                )
+                if created:
+                    added += 1
+            skipped = all_products.count() - added
+            msg = f'Добавлено {added} товаров в магазин "{store.name}".'
+            if skipped:
+                msg += f' Пропущено {skipped} (уже были в магазине).'
+            self.message_user(request, msg)
+            return HttpResponseRedirect(
+                reverse('admin:catalog_store_change', args=[store_id])
+            )
+
+        # GET — страница подтверждения
+        total = Product.objects.count()
+        csrf_token = get_token(request)
+        action_url = reverse('admin:catalog_store_add_all_products', args=[store_id])
+        back_url = reverse('admin:catalog_store_change', args=[store_id])
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Добавить все товары в магазин</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }}
+                h1 {{ color: #444; font-size: 22px; margin-bottom: 20px; }}
+                .info {{ background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px; }}
+                button {{ background: #444; color: white; padding: 12px 24px; border: none;
+                          border-radius: 4px; cursor: pointer; font-size: 15px; font-weight: 500; }}
+                button:hover {{ background: #333; }}
+                .back-link {{ display: inline-block; margin-top: 15px; color: #444;
+                               text-decoration: none; font-size: 14px; margin-left: 15px; }}
+                .back-link:hover {{ text-decoration: underline; }}
+            </style>
+        </head>
+        <body>
+            <h1>Добавить все товары в магазин</h1>
+            <div class="info">
+                Магазин: <strong>{store.name}</strong><br>
+                Будет добавлено: <strong>{total} товаров</strong> (уже существующие будут пропущены)
+            </div>
+            <form method="post" action="{action_url}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+                <button type="submit">Добавить все {total} товаров</button>
+            </form>
+            <a href="{back_url}" class="back-link">← Отмена</a>
+        </body>
+        </html>
+        """
+        return HttpResponse(html)
+
+    def add_all_products_button(self, obj):
+        if obj.pk:
+            url = reverse('admin:catalog_store_add_all_products', args=[obj.pk])
+            return format_html(
+                '<a href="{}" style="display: inline-block; padding: 8px 16px; background: #444; '
+                'color: white; text-decoration: none; border-radius: 4px; font-size: 13px; '
+                'font-weight: 500;">Добавить все товары в этот магазин</a>',
+                url
+            )
+        return "Сохраните магазин для использования этой функции"
+    add_all_products_button.short_description = "Добавить все товары"
 
     def products_count(self, obj):
         count = obj.stock.count()

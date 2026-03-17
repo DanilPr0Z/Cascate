@@ -154,12 +154,25 @@ def generate_order_pdf(cart, customer_info=None):
     data = [['№', 'Фото', 'Товар', 'Материалы', 'Цена', 'Кол-во', 'Итого']]
 
     for idx, item in enumerate(cart_items, 1):
-        product_name = item.product.name[:40] if len(item.product.name) <= 40 else item.product.name[:37] + '...'
+        name_style = ParagraphStyle(
+            'NameStyle',
+            fontName=font_name,
+            fontSize=8,
+            leading=10,
+            wordWrap='CJK',
+        )
+        product_name = Paragraph(item.product.name, name_style)
 
         # Материалы товара
-        materials = item.product.materials if item.product.materials else '—'
-        if len(materials) > 30:
-            materials = materials[:27] + '...'
+        materials_text = item.product.materials if item.product.materials else '—'
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            fontName=font_name,
+            fontSize=8,
+            leading=10,
+            wordWrap='CJK',
+        )
+        materials = Paragraph(materials_text, cell_style)
 
         # Получаем главное изображение товара
         product_image = None

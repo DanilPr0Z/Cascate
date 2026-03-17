@@ -121,6 +121,7 @@ class Product(models.Model):
     slug = models.SlugField(max_length=500, unique=True, verbose_name="URL")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена данной модели")
     price_from = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Цена от")
+    discount = models.PositiveSmallIntegerField(default=0, verbose_name="Скидка (%)", help_text="От 0 до 99. При ненулевом значении цена отображается красным.")
 
     # Основная информация
     country = models.CharField(max_length=100, blank=True, verbose_name="Страна")
@@ -158,6 +159,13 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse('catalog:product_detail', kwargs={'slug': self.slug})
+
+    @property
+    def discounted_price(self):
+        """Цена с учётом скидки. None если скидка не задана."""
+        if self.discount and self.discount > 0:
+            return self.price * (100 - self.discount) / 100
+        return None
 
     def get_main_image(self):
         """Возвращает главное изображение товара"""

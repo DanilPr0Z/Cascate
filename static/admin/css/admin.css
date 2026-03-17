@@ -405,8 +405,6 @@
 
 #result_list tbody tr:hover {
     background: linear-gradient(90deg, var(--primary-light), transparent);
-    transform: translateX(4px);
-    box-shadow: -4px 0 0 var(--primary);
 }
 
 #result_list tbody tr.selected {
@@ -592,8 +590,13 @@ fieldset.module h2 {
 
 .form-row:hover {
     background: var(--primary-light);
-    transform: translateX(6px);
-    box-shadow: 0 4px 12px rgba(32, 178, 170, 0.15);
+}
+
+/* Make readonly field buttons work properly */
+.readonly button {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10;
 }
 
 label {

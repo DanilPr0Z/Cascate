@@ -74,7 +74,15 @@
                         </div>
                         <div class="product-info">
                             <h3 class="product-name">{{ product.name }}</h3>
+                            {% if product.discounted_price %}
+                            <p class="product-price product-price--discount">
+                                <span class="product-price__old">{{ product.price|floatformat:0 }} ₽</span>
+                                <span class="product-price__new">{{ product.discounted_price|floatformat:0 }} ₽</span>
+                                <span class="product-price__badge">-{{ product.discount }}%</span>
+                            </p>
+                            {% else %}
                             <p class="product-price">{{ product.price|floatformat:0 }} ₽</p>
+                            {% endif %}
                             <div class="product-details-hover">
                                 {% if product.country %}
                                 <p class="product-detail">Страна: {{ product.country }}</p>

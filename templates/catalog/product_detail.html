@@ -55,7 +55,13 @@
                 </div>
 
                 <div class="product-price-large">
-                    {{ product.price|floatformat:0 }} ₽
+                    {% if product.discounted_price %}
+                        <span class="product-price__old" style="text-decoration:line-through;color:#999;font-size:0.65em;display:block;margin-bottom:2px;">{{ product.price|floatformat:0 }} ₽</span>
+                        <span class="product-price__new" style="color:#e53935;">{{ product.discounted_price|floatformat:0 }} ₽</span>
+                        <span class="product-price__badge" style="background:#e53935;color:#fff;font-size:0.5em;padding:3px 9px;border-radius:12px;vertical-align:middle;margin-left:8px;">-{{ product.discount }}%</span>
+                    {% else %}
+                        {{ product.price|floatformat:0 }} ₽
+                    {% endif %}
                 </div>
 
                 <div class="product-actions">
@@ -111,7 +117,15 @@
                     </div>
                     <div class="product-info">
                         <h3 class="product-name">{{ related_product.name }}</h3>
+                        {% if related_product.discounted_price %}
+                        <p class="product-price product-price--discount">
+                            <span class="product-price__old">{{ related_product.price|floatformat:0 }} ₽</span>
+                            <span class="product-price__new">{{ related_product.discounted_price|floatformat:0 }} ₽</span>
+                            <span class="product-price__badge">-{{ related_product.discount }}%</span>
+                        </p>
+                        {% else %}
                         <p class="product-price">{{ related_product.price|floatformat:0 }} ₽</p>
+                        {% endif %}
                     </div>
                     <a href="{{ related_product.get_absolute_url }}" class="product-link"></a>
                 </div>

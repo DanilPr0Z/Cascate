@@ -239,6 +239,36 @@
     margin-bottom: 12px;
 }
 
+.product-price--discount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.product-price__old {
+    font-size: 14px;
+    font-weight: 400;
+    color: #999;
+    text-decoration: line-through;
+}
+
+.product-price__new {
+    font-size: 20px;
+    font-weight: 700;
+    color: #e53935;
+}
+
+.product-price__badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    background: #e53935;
+    padding: 2px 7px;
+    border-radius: 10px;
+    line-height: 1.6;
+}
+
 .product-details-hover {
     position: absolute;
     top: calc(100% - 15px);
