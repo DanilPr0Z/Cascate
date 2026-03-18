@@ -108,7 +108,7 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('wide',)
         }),
         ('Характеристики товара', {
-            'fields': ('materials', 'dimensions', 'product_number', 'availability'),
+            'fields': ('materials', 'dimensions', 'product_number', 'availability', 'tour_3d_url'),
         }),
         ('Описание', {
             'fields': ('short_description', 'description'),

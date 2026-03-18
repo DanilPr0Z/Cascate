@@ -141,6 +141,9 @@ class Product(models.Model):
     description = models.TextField(blank=True, verbose_name="Описание")
     short_description = models.CharField(max_length=500, blank=True, verbose_name="Краткое описание")
 
+    # 3D тур
+    tour_3d_url = models.URLField(blank=True, verbose_name="Ссылка на 3D тур")
+
     # QR код
     qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True, verbose_name="QR код")
 
