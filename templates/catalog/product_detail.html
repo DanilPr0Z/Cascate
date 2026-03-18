@@ -72,7 +72,7 @@
 
                 <div class="product-actions">
                     <button class="btn-primary add-to-cart-btn" data-product-id="{{ product.id }}">ДОБАВИТЬ В КОРЗИНУ</button>
-                    <a href="https://360space.ru/catalog/mttr-cascate-porte-e-mobile-olimp22/fullscreen/" class="btn-outline view-in-salon-btn" target="_blank" rel="noopener noreferrer">ПОСМОТРЕТЬ В САЛОНЕ</a>
+                    <a href="{% if product.tour_3d_url %}{{ product.tour_3d_url }}{% else %}https://360space.ru/catalog/mttr-cascate-porte-e-mobile-olimp22/fullscreen/{% endif %}" class="btn-outline view-in-salon-btn" target="_blank" rel="noopener noreferrer">ПОСМОТРЕТЬ В САЛОНЕ</a>
                 </div>
 
                 <div class="product-availability-simple">
