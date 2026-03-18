@@ -257,7 +257,7 @@ class Store(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return self.name
+        return self.address
 
 
 class ProductStock(models.Model):

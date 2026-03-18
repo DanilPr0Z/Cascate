@@ -88,7 +88,7 @@ class ProductStockInline(admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['image_preview', 'name', 'category', 'price_formatted', 'discount_badge', 'availability_badge', 'is_new_display', 'created_at', 'view_on_site']
     prepopulated_fields = {'slug': ('name',)}
-    search_fields = ['name', 'product_number', 'description', 'slug']
+    search_fields = ['name', '=product_number', 'slug']
     actions = ['assign_to_store']
     inlines = [ProductImageInline, ProductStockInline]
     list_per_page = 25
@@ -108,21 +108,14 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('wide',)
         }),
         ('Характеристики товара', {
-            'fields': ('country', 'materials', 'dimensions', 'product_number'),
+            'fields': ('materials', 'dimensions', 'product_number', 'availability'),
         }),
         ('Описание', {
             'fields': ('short_description', 'description'),
             'classes': ('wide',)
         }),
-        ('Фильтры и статусы', {
-            'fields': ('availability', 'is_new', 'is_popular'),
-        }),
         ('QR код и карточка товара', {
             'fields': ('qr_code', 'qr_code_preview', 'product_card_preview', 'generate_card_button'),
-            'classes': ('collapse',)
-        }),
-        ('Статистика', {
-            'fields': ('created_at', 'updated_at', 'views_count'),
             'classes': ('collapse',)
         }),
     )
@@ -152,8 +145,50 @@ class ProductAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.assign_to_store_view),
                 name='catalog_product_assign_to_store',
             ),
+            path(
+                'export-excel/',
+                self.admin_site.admin_view(self.export_excel_view),
+                name='catalog_product_export_excel',
+            ),
         ]
         return custom_urls + urls
+
+    def export_excel_view(self, request):
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from django.http import HttpResponse
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Товары"
+
+        headers = ['Артикул', 'Название', 'Материал', 'Размеры', 'Цена']
+        header_fill = PatternFill(start_color='444444', end_color='444444', fill_type='solid')
+        header_font = Font(bold=True, color='FFFFFF')
+
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center')
+
+        for row, product in enumerate(Product.objects.all().order_by('name'), 2):
+            ws.cell(row=row, column=1, value=product.product_number or '—')
+            ws.cell(row=row, column=2, value=product.name)
+            ws.cell(row=row, column=3, value=product.materials or '—')
+            ws.cell(row=row, column=4, value=product.dimensions or '—')
+            ws.cell(row=row, column=5, value=float(product.price))
+
+        ws.column_dimensions['A'].width = 18
+        ws.column_dimensions['B'].width = 40
+        ws.column_dimensions['C'].width = 30
+        ws.column_dimensions['D'].width = 20
+        ws.column_dimensions['E'].width = 14
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="products.xlsx"'
+        wb.save(response)
+        return response
 
     def assign_to_store(self, request, queryset):
         """Действие: перенаправить на страницу выбора магазина"""

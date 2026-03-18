@@ -182,12 +182,18 @@ def product_detail(request, slug):
 
     session_key = request.session.session_key
 
+    # Магазины где товар в наличии
+    stores_in_stock = [
+        s.store for s in product.stock.select_related('store').filter(store__is_active=True)
+    ]
+
     context = {
         'product': product,
         'related_products': related_products,
         'average_rating': product.get_average_rating(),
         'ratings_count': product.get_ratings_count(),
         'user_rating': product.get_user_rating(session_key),
+        'stores_in_stock': stores_in_stock,
     }
     return render(request, 'catalog/product_detail.html', context)
 
