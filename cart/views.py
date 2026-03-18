@@ -41,7 +41,7 @@ def generate_order_pdf(cart, customer_info=None):
     buffer = BytesIO()
 
     # Создаем PDF документ
-    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm, leftMargin=1.5*cm, rightMargin=1.5*cm)
     elements = []
 
     # Регистрируем шрифты с поддержкой кириллицы
@@ -204,7 +204,7 @@ def generate_order_pdf(cart, customer_info=None):
     data.append(['', '', '', '', 'Итого:', f"{total_items} шт", f"{cart.get_total_price():.0f} ₽"])
 
     # Создаем таблицу
-    table = Table(data, colWidths=[0.8*cm, 1.8*cm, 5*cm, 3*cm, 2*cm, 1.2*cm, 2.2*cm])
+    table = Table(data, colWidths=[0.8*cm, 1.8*cm, 6*cm, 4*cm, 2*cm, 1.2*cm, 2.2*cm])
 
     # Стиль таблицы
     table.setStyle(TableStyle([
