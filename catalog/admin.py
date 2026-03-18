@@ -44,7 +44,6 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(SubCategory)
 class SubCategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'category', 'order', 'view_on_site']
-    list_filter = ['category']
     list_editable = ['order']
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name', 'category__name']
@@ -80,7 +79,6 @@ class ProductStockInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['image_preview', 'name', 'category', 'price_formatted', 'discount_badge', 'availability_badge', 'is_new_display', 'created_at', 'view_on_site']
-    list_filter = ['category', 'subcategory', 'availability', 'is_new', 'is_popular', 'created_at']
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name', 'product_number', 'description', 'slug']
     actions = ['assign_to_store']
@@ -683,7 +681,6 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
     list_display = ['name', 'address', 'phone', 'is_active', 'products_count']
-    list_filter = ['is_active']
     search_fields = ['name', 'address', 'phone']
     list_editable = ['is_active']
     list_per_page = 25
@@ -804,7 +801,6 @@ class StoreAdmin(admin.ModelAdmin):
 @admin.register(ProductStock)
 class ProductStockAdmin(admin.ModelAdmin):
     list_display = ['product', 'store', 'quantity', 'updated_at']
-    list_filter = ['store']
     search_fields = ['product__name', 'store__name']
     autocomplete_fields = ['product', 'store']
     list_per_page = 50
@@ -813,7 +809,6 @@ class ProductStockAdmin(admin.ModelAdmin):
 @admin.register(ProductRating)
 class ProductRatingAdmin(admin.ModelAdmin):
     list_display = ['product', 'rating', 'session_key_short', 'created_at']
-    list_filter = ['rating', 'created_at']
     search_fields = ['product__name', 'session_key']
     readonly_fields = ['created_at']
     list_per_page = 50

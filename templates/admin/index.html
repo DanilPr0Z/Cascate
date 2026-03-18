@@ -1,5 +1,5 @@
 {% extends "admin/index.html" %}
-{% load i18n static %}
+{% load i18n static log %}
 
 {% block extrastyle %}
 {{ block.super }}
@@ -8,43 +8,113 @@
 
 {% block content %}
 <div class="dashboard-modern">
-    {% if app_list %}
-    <div class="dashboard-grid">
-        {% for app in app_list %}
-        <div class="dashboard-app">
-            <div class="app-header">
-                <h2 class="app-title">{{ app.name|upper }}</h2>
-            </div>
-            <div class="app-content">
-                <div class="app-models">
-                    {% for model in app.models %}
-                    <div class="model-item">
-                        <div class="model-info">
-                            <span class="model-name">{{ model.name }}</span>
+    <div class="dashboard-three-col">
+
+        {# Левая колонка: Каталог #}
+        <div class="dashboard-col">
+            {% for app in app_list %}
+            {% if app.app_label == 'catalog' %}
+            <div class="dashboard-app">
+                <div class="app-header">
+                    <h2 class="app-title">{{ app.name|upper }}</h2>
+                </div>
+                <div class="app-content">
+                    <div class="app-models">
+                        {% for model in app.models %}
+                        <div class="model-item">
+                            <div class="model-info">
+                                <span class="model-name">{{ model.name }}</span>
+                            </div>
+                            <div class="model-actions">
+                                {% if model.add_url %}
+                                <a href="{{ model.add_url }}" class="action-btn add-btn" title="{% trans 'Add' %}">
+                                    <span class="btn-icon">+</span>{% trans 'Add' %}
+                                </a>
+                                {% endif %}
+                                {% if model.admin_url %}
+                                <a href="{{ model.admin_url }}" class="action-btn edit-btn" title="{% trans 'Change' %}">
+                                    <span class="btn-icon">✏️</span>{% trans 'Change' %}
+                                </a>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="model-actions">
-                            {% if model.add_url %}
-                            <a href="{{ model.add_url }}" class="action-btn add-btn" title="{% trans 'Add' %}">
-                                <span class="btn-icon">+</span>
-                                {% trans 'Add' %}
-                            </a>
-                            {% endif %}
-                            {% if model.admin_url %}
-                            <a href="{{ model.admin_url }}" class="action-btn edit-btn" title="{% trans 'Change' %}">
-                                <span class="btn-icon">✏️</span>
-                                {% trans 'Change' %}
-                            </a>
-                            {% endif %}
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        {# Средняя колонка: Пользователи и группы #}
+        <div class="dashboard-col">
+            {% for app in app_list %}
+            {% if app.app_label == 'auth' %}
+            <div class="dashboard-app">
+                <div class="app-header">
+                    <h2 class="app-title">{% trans 'Пользователи' %}</h2>
+                </div>
+                <div class="app-content">
+                    <div class="app-models">
+                        {% for model in app.models %}
+                        <div class="model-item">
+                            <div class="model-info">
+                                <span class="model-name">{{ model.name }}</span>
+                            </div>
+                            <div class="model-actions">
+                                {% if model.add_url %}
+                                <a href="{{ model.add_url }}" class="action-btn add-btn" title="{% trans 'Add' %}">
+                                    <span class="btn-icon">+</span>{% trans 'Add' %}
+                                </a>
+                                {% endif %}
+                                {% if model.admin_url %}
+                                <a href="{{ model.admin_url }}" class="action-btn edit-btn" title="{% trans 'Change' %}">
+                                    <span class="btn-icon">✏️</span>{% trans 'Change' %}
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        {# Правая колонка: Последние действия #}
+        <div class="dashboard-col">
+            <div class="dashboard-app">
+                <div class="app-header">
+                    <h2 class="app-title">{% trans 'Последние действия' %}</h2>
+                </div>
+                <div class="app-content">
+                    {% get_admin_log 10 as admin_log for_user user %}
+                    {% if admin_log %}
+                    <ul class="recent-actions-list">
+                        {% for entry in admin_log %}
+                        <li class="recent-action-item">
+                            <span class="recent-action-flag {% if entry.is_addition %}addition{% elif entry.is_change %}change{% elif entry.is_deletion %}deletion{% endif %}"></span>
+                            <div class="recent-action-info">
+                                {% if entry.is_deletion or not entry.get_admin_url %}
+                                    <span class="recent-action-object">{{ entry.object_repr }}</span>
+                                {% else %}
+                                    <a href="{{ entry.get_admin_url }}" class="recent-action-object">{{ entry.object_repr }}</a>
+                                {% endif %}
+                                <span class="recent-action-model">{{ entry.content_type.app_labeled_name }}</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">{% trans 'Действий пока нет.' %}</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        {% endfor %}
+
     </div>
-    {% else %}
-    <p class="empty-state">{% trans "You don't have permission to view or edit anything." %}</p>
-    {% endif %}
 </div>
 {% endblock %}
+
+{% block sidebar %}{% endblock %}
