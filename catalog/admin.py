@@ -8,6 +8,14 @@ from django.middleware.csrf import get_token
 from .models import Category, SubCategory, Product, ProductImage, Store, ProductStock, ProductRating
 import os
 
+# Убираем django_cron из админки
+try:
+    from django_cron.models import CronJobLog, CronJobLock
+    admin.site.unregister(CronJobLog)
+    admin.site.unregister(CronJobLock)
+except Exception:
+    pass
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
