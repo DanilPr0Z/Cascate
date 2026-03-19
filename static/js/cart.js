@@ -200,10 +200,9 @@ function updateQuantity(itemId, quantity) {
 
 // Обновить общую сумму
 function updateCartTotal(totalPrice) {
-    const totalElement = document.querySelector('.cart-total-price');
-    if (totalElement) {
-        totalElement.textContent = `${formatPrice(totalPrice)} ₽`;
-    }
+    document.querySelectorAll('.cart-total-price').forEach(el => {
+        el.textContent = `${formatPrice(totalPrice)} ₽`;
+    });
 }
 
 // Форматировать цену
