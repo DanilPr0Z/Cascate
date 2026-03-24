@@ -241,32 +241,47 @@
 
 .product-price--discount {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
 }
 
 .product-price__old {
     font-size: 14px;
     font-weight: 400;
     color: #999;
-    text-decoration: line-through;
+    text-decoration: line-through !important;
+}
+
+.product-price__discount-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
 }
 
 .product-price__new {
     font-size: 20px;
     font-weight: 700;
-    color: #e53935;
+    color: #e53935 !important;
 }
 
 .product-price__badge {
     font-size: 11px;
     font-weight: 600;
-    color: #fff;
-    background: #e53935;
+    color: #fff !important;
+    background: #e53935 !important;
     padding: 2px 7px;
     border-radius: 10px;
     line-height: 1.6;
+    white-space: nowrap;
+}
+
+.product-price-from {
+    font-size: 13px;
+    color: #666;
+    margin-top: 2px;
+    margin-bottom: 0;
 }
 
 .product-details-hover {

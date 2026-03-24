@@ -98,7 +98,28 @@
                     {% endif %}
                 </div>
 
-                <a href="tel:+78002340173" class="btn-outline details-btn">Уточнить детали</a>
+                <button class="btn-outline details-btn" onclick="openDemoPopup()">Уточнить детали</button>
+            </div>
+        </div>
+
+        <!-- Popup форма демо-расчёта -->
+        <div id="demo-popup-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+            <div id="form-demo" style="background:#fff; padding:32px; border-radius:8px; max-width:420px; width:90%; position:relative;">
+                <div style="font-size:26px; font-weight:bold; color:#000;">Уточнить о товаре</div>
+                <input type="hidden" id="form_demo_product_name" value="{{ product.name }}">
+                <input type="hidden" id="form_demo_product_url" value="{{ request.build_absolute_uri }}">
+                <div style="font-size:18px; font-weight:bold; color:#000; margin-top:20px;">ФИО</div>
+                <div><input type="text" id="form_demo_fio" style="margin-top:10px; width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;"></div>
+                <div style="font-size:18px; font-weight:bold; color:#000; margin-top:20px;">Телефон</div>
+                <div><input type="text" id="form_demo_telephone" style="margin-top:10px; width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;"></div>
+                <div style="margin-top:16px;">
+                    <input type="checkbox" id="agree2_k2" required>
+                    <label for="agree2_k2">Я принимаю условия <a href="/page/legalcontent/" style="text-decoration:underline;">политики конфиденциальности</a> и даю согласие на обработку персональных данных.</label>
+                </div>
+                <div style="display:flex; margin-top:20px; justify-content:space-between; gap:12px;">
+                    <button onclick="form_demo_submit()" style="cursor:pointer; background-color:rgba(200,0,0,0.7); color:#fff; border:none; padding:10px 20px; border-radius:4px; font-size:16px; flex:1;">Получить</button>
+                    <button onclick="closeDemoPopup()" style="cursor:pointer; background:#eee; border:none; padding:10px 20px; border-radius:4px; font-size:16px; flex:1;">Закрыть</button>
+                </div>
             </div>
         </div>
 
@@ -147,6 +168,52 @@
 
 {% block extra_js %}
 {% csrf_token %}
+<script>
+function openDemoPopup() {
+    var overlay = document.getElementById('demo-popup-overlay');
+    overlay.style.display = 'flex';
+}
+
+function closeDemoPopup() {
+    document.getElementById('demo-popup-overlay').style.display = 'none';
+    document.getElementById('form_demo_fio').value = '';
+    document.getElementById('form_demo_telephone').value = '';
+    document.getElementById('agree2_k2').checked = false;
+}
+
+document.getElementById('demo-popup-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeDemoPopup();
+});
+
+function form_demo_submit() {
+    var agree = document.getElementById('agree2_k2');
+    if (!agree.checked) {
+        alert('Пожалуйста, примите условия политики конфиденциальности.');
+        return;
+    }
+    var fio = document.getElementById('form_demo_fio').value;
+    var telephone = document.getElementById('form_demo_telephone').value;
+    var productName = document.getElementById('form_demo_product_name').value;
+    var productUrl = document.getElementById('form_demo_product_url').value;
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('/ajax/form_demo/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken},
+        body: 'fio=' + encodeURIComponent(fio) + '&telephone=' + encodeURIComponent(telephone) +
+              '&product_name=' + encodeURIComponent(productName) + '&product_url=' + encodeURIComponent(productUrl)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.status === 'failed') {
+            alert(data.message);
+        } else {
+            closeDemoPopup();
+            alert('Спасибо! Мы свяжемся с вами в ближайшее время.');
+        }
+    });
+}
+</script>
 <script src="{% static 'js/product_detail.js' %}"></script>
 <script src="{% static 'js/cart.js' %}"></script>
 <script>

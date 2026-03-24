@@ -59,7 +59,7 @@ class SubCategory(models.Model):
         unique_together = ['category', 'slug']
 
     def __str__(self):
-        return f"{self.category.name} - {self.name}"
+        return self.name
 
     def get_absolute_url(self):
         return reverse('catalog:subcategory_detail', kwargs={
@@ -146,6 +146,9 @@ class Product(models.Model):
 
     # QR код
     qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True, verbose_name="QR код")
+
+    # Точка на карте (только для внутреннего использования)
+    map_point = models.CharField(max_length=500, blank=True, verbose_name="Точка на карте", help_text="Координаты или идентификатор точки на карте. Не отображается на сайте.")
 
     # Метаданные
     created_at = models.DateTimeField(auto_now_add=True)

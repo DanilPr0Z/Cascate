@@ -108,7 +108,7 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('wide',)
         }),
         ('Характеристики товара', {
-            'fields': ('materials', 'dimensions', 'product_number', 'availability', 'tour_3d_url'),
+            'fields': ('materials', 'dimensions', 'product_number', 'availability', 'tour_3d_url', 'map_point'),
         }),
         ('Описание', {
             'fields': ('short_description', 'description'),
@@ -120,6 +120,9 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ['created_at', 'updated_at', 'views_count', 'image_preview', 'qr_code_preview', 'product_card_preview', 'generate_card_button']
+
+    class Media:
+        js = ('admin/js/product_subcategory_filter.js',)
 
     def get_urls(self):
         """Добавляем URL для генерации карточки и импорта"""
@@ -150,8 +153,22 @@ class ProductAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.export_excel_view),
                 name='catalog_product_export_excel',
             ),
+            path(
+                'subcategories-by-category/',
+                self.admin_site.admin_view(self.subcategories_by_category_view),
+                name='catalog_product_subcategories_by_category',
+            ),
         ]
         return custom_urls + urls
+
+    def subcategories_by_category_view(self, request):
+        """AJAX: вернуть подкатегории для выбранной категории"""
+        category_id = request.GET.get('category_id')
+        if not category_id:
+            return JsonResponse({'subcategories': []})
+        subcategories = SubCategory.objects.filter(category_id=category_id).order_by('order', 'name')
+        data = [{'id': s.id, 'name': s.name} for s in subcategories]
+        return JsonResponse({'subcategories': data})
 
     def export_excel_view(self, request):
         import openpyxl
@@ -162,7 +179,12 @@ class ProductAdmin(admin.ModelAdmin):
         ws = wb.active
         ws.title = "Товары"
 
-        headers = ['Артикул', 'Название', 'Материал', 'Размеры', 'Цена']
+        headers = [
+            'Название', 'Артикул', 'Материалы', 'Размеры',
+            'Цена', 'Цена от', 'Скидка %',
+            'Наличие', 'Категория', 'Подкатегория',
+            'Описание', 'Ссылка на 3D тур', 'Точка на карте',
+        ]
         header_fill = PatternFill(start_color='444444', end_color='444444', fill_type='solid')
         header_font = Font(bold=True, color='FFFFFF')
 
@@ -172,18 +194,25 @@ class ProductAdmin(admin.ModelAdmin):
             cell.font = header_font
             cell.alignment = Alignment(horizontal='center')
 
-        for row, product in enumerate(Product.objects.all().order_by('name'), 2):
-            ws.cell(row=row, column=1, value=product.product_number or '—')
-            ws.cell(row=row, column=2, value=product.name)
-            ws.cell(row=row, column=3, value=product.materials or '—')
-            ws.cell(row=row, column=4, value=product.dimensions or '—')
+        products = Product.objects.select_related('category', 'subcategory').order_by('name')
+        for row, product in enumerate(products, 2):
+            ws.cell(row=row, column=1, value=product.name)
+            ws.cell(row=row, column=2, value=product.product_number or '')
+            ws.cell(row=row, column=3, value=product.materials or '')
+            ws.cell(row=row, column=4, value=product.dimensions or '')
             ws.cell(row=row, column=5, value=float(product.price))
+            ws.cell(row=row, column=6, value=float(product.price_from) if product.price_from else '')
+            ws.cell(row=row, column=7, value=product.discount or 0)
+            ws.cell(row=row, column=8, value=product.availability or '')
+            ws.cell(row=row, column=9, value=product.category.name if product.category else '')
+            ws.cell(row=row, column=10, value=product.subcategory.name if product.subcategory else '')
+            ws.cell(row=row, column=11, value=product.description or '')
+            ws.cell(row=row, column=12, value=product.tour_3d_url or '')
+            ws.cell(row=row, column=13, value=int(product.map_point) if product.map_point and product.map_point.isdigit() else (product.map_point or ''))
 
-        ws.column_dimensions['A'].width = 18
-        ws.column_dimensions['B'].width = 40
-        ws.column_dimensions['C'].width = 30
-        ws.column_dimensions['D'].width = 20
-        ws.column_dimensions['E'].width = 14
+        col_widths = [40, 18, 30, 20, 14, 14, 12, 20, 25, 25, 40, 35, 18]
+        for i, w in enumerate(col_widths, 1):
+            ws.column_dimensions[ws.cell(row=1, column=i).column_letter].width = w
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="products.xlsx"'
@@ -296,7 +325,12 @@ class ProductAdmin(admin.ModelAdmin):
         ws.title = "Товары"
 
         # Заголовки столбцов
-        headers = ['Название', 'Материалы', 'Размеры', 'Магазин', 'Цена', 'Категория', 'Подкатегория']
+        headers = [
+            'Название', 'Артикул', 'Материалы', 'Размеры',
+            'Цена', 'Цена от', 'Скидка %',
+            'Наличие', 'Категория', 'Подкатегория',
+            'Описание', 'Ссылка на 3D тур', 'Точка на карте',
+        ]
 
         # Стиль заголовков
         header_fill = PatternFill(start_color="20B2AA", end_color="20B2AA", fill_type="solid")
@@ -312,12 +346,18 @@ class ProductAdmin(admin.ModelAdmin):
 
         # Добавляем пример строки
         ws.cell(row=2, column=1, value='ОБЕДЕННЫЙ СТОЛ')
-        ws.cell(row=2, column=2, value='Дерево, металл')
-        ws.cell(row=2, column=3, value='120x80x75 см')
-        ws.cell(row=2, column=4, value='Москва')
+        ws.cell(row=2, column=2, value='ART-001')
+        ws.cell(row=2, column=3, value='Дерево, металл')
+        ws.cell(row=2, column=4, value='120x80x75 см')
         ws.cell(row=2, column=5, value=15000)
-        ws.cell(row=2, column=6, value='Столовые')
-        ws.cell(row=2, column=7, value='Столы обеденные')
+        ws.cell(row=2, column=6, value=12000)
+        ws.cell(row=2, column=7, value=10)
+        ws.cell(row=2, column=8, value='in_stock')
+        ws.cell(row=2, column=9, value='Столовые')
+        ws.cell(row=2, column=10, value='Столы обеденные')
+        ws.cell(row=2, column=11, value='Описание товара')
+        ws.cell(row=2, column=12, value='https://example.com/3d-tour')
+        ws.cell(row=2, column=13, value=1)
 
         # Инструкция на втором листе
         ws2 = wb.create_sheet("Инструкция")
@@ -327,12 +367,24 @@ class ProductAdmin(admin.ModelAdmin):
         instructions = [
             "",
             "1. Название - обязательное поле, название товара",
-            "2. Материалы - из чего сделан товар (опционально)",
-            "3. Размеры - габариты товара (опционально)",
-            "4. Магазин - название магазина где товар в наличии",
+            "2. Артикул - номер товара (опционально)",
+            "3. Материалы - из чего сделан товар (опционально)",
+            "4. Размеры - габариты товара (опционально)",
             "5. Цена - цена товара в рублях (обязательно)",
-            "6. Категория - название категории (должна существовать в системе)",
-            "7. Подкатегория - название подкатегории (опционально)",
+            "6. Цена от - минимальная цена 'от' (опционально)",
+            "7. Скидка % - скидка в процентах 0-99 (опционально, 0 = нет скидки)",
+            "8. Наличие - статус наличия (опционально):",
+            "   in_stock = В наличии",
+            "   on_the_way = Товар в пути",
+            "   new_2025 = Новинка 2025 года",
+            "   new_arrival = Новое поступление",
+            "   best_offer = Лучшее предложение",
+            "   online_fitting = Онлайн-примерка",
+            "9. Категория - название категории (должна существовать в системе)",
+            "10. Подкатегория - название подкатегории (опционально)",
+            "11. Описание - подробное описание товара (опционально)",
+            "12. Ссылка на 3D тур - URL ссылка на 3D тур товара (опционально)",
+            "13. Точка на карте - число от 1 до бесконечности (не отображается на сайте)",
             "",
             "Доступные категории и подкатегории:",
         ]
@@ -349,32 +401,15 @@ class ProductAdmin(admin.ModelAdmin):
                 instructions.append(f"    (нет подкатегорий)")
             instructions.append("")
 
-        instructions.extend([
-            "Доступные магазины:",
-        ])
-
-        # Добавляем список магазинов
-        stores = Store.objects.filter(is_active=True)
-        for store in stores:
-            instructions.append(f"  - {store.name}")
-
         for row_num, instruction in enumerate(instructions, 3):
             ws2.cell(row=row_num, column=1, value=instruction)
 
-        # Автоширина столбцов
-        for column in ws.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = min(max_length + 2, 30)
-            ws.column_dimensions[column_letter].width = adjusted_width
+        # Ширина столбцов
+        col_widths = [40, 18, 30, 20, 14, 14, 12, 20, 25, 25, 40, 35, 18]
+        for i, w in enumerate(col_widths, 1):
+            ws.column_dimensions[ws.cell(row=1, column=i).column_letter].width = w
 
-        ws2.column_dimensions['A'].width = 50
+        ws2.column_dimensions['A'].width = 60
 
         # Создаем HTTP ответ
         response = HttpResponse(
@@ -416,19 +451,36 @@ class ProductAdmin(admin.ModelAdmin):
                         continue
 
                     try:
+                        # Колонки: Название, Артикул, Материалы, Размеры, Цена, Цена от, Скидка%,
+                        #           Наличие, Категория, Подкатегория, Описание, Ссылка 3D, Точка на карте
                         name = row[0]
-                        materials = row[1] if row[1] else ''
-                        dimensions = row[2] if row[2] else ''
-                        store_name = row[3] if row[3] else None
-                        price = row[4]
-                        category_name = row[5]
-                        subcategory_name = row[6] if len(row) > 6 and row[6] else None
+                        product_number = row[1] if len(row) > 1 and row[1] else ''
+                        materials = row[2] if len(row) > 2 and row[2] else ''
+                        dimensions = row[3] if len(row) > 3 and row[3] else ''
+                        price = row[4] if len(row) > 4 and row[4] else None
+                        price_from = row[5] if len(row) > 5 and row[5] else None
+                        discount = int(row[6]) if len(row) > 6 and row[6] else 0
+                        availability = row[7] if len(row) > 7 and row[7] else None
+                        category_name = row[8] if len(row) > 8 and row[8] else None
+                        subcategory_name = row[9] if len(row) > 9 and row[9] else None
+                        description = row[10] if len(row) > 10 and row[10] else ''
+                        tour_3d_url = row[11] if len(row) > 11 and row[11] else ''
+                        map_point = str(int(row[12])) if len(row) > 12 and row[12] else ''
+
+                        if not price:
+                            errors.append(f"Строка {row_num}: Не указана цена")
+                            continue
 
                         # Находим категорию
-                        try:
-                            category = Category.objects.get(name=category_name)
-                        except Category.DoesNotExist:
-                            errors.append(f"Строка {row_num}: Категория '{category_name}' не найдена")
+                        category = None
+                        if category_name:
+                            try:
+                                category = Category.objects.get(name=category_name)
+                            except Category.DoesNotExist:
+                                errors.append(f"Строка {row_num}: Категория '{category_name}' не найдена")
+                                continue
+                        else:
+                            errors.append(f"Строка {row_num}: Не указана категория")
                             continue
 
                         # Находим подкатегорию если указана
@@ -437,30 +489,24 @@ class ProductAdmin(admin.ModelAdmin):
                             try:
                                 subcategory = SubCategory.objects.get(name=subcategory_name, category=category)
                             except SubCategory.DoesNotExist:
-                                errors.append(f"Строка {row_num}: Подкатегория '{subcategory_name}' не найдена в категории '{category_name}'")
-                                # Продолжаем без подкатегории
+                                errors.append(f"Строка {row_num}: Подкатегория '{subcategory_name}' не найдена (товар создан без подкатегории)")
 
                         # Создаем товар
                         product = Product.objects.create(
                             name=name,
+                            product_number=product_number,
                             category=category,
                             subcategory=subcategory,
                             price=price,
+                            price_from=price_from if price_from else None,
+                            discount=discount,
+                            availability=availability or '',
                             materials=materials,
                             dimensions=dimensions,
+                            description=description,
+                            tour_3d_url=tour_3d_url,
+                            map_point=map_point,
                         )
-
-                        # Добавляем в магазин если указан
-                        if store_name:
-                            try:
-                                store = Store.objects.get(name=store_name)
-                                ProductStock.objects.create(
-                                    product=product,
-                                    store=store,
-                                    quantity=1
-                                )
-                            except Store.DoesNotExist:
-                                errors.append(f"Строка {row_num}: Магазин '{store_name}' не найден (товар создан без магазина)")
 
                         created_count += 1
 

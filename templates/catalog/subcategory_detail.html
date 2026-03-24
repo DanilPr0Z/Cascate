@@ -36,6 +36,7 @@
                             <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>По цене: от дешевых</option>
                             <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>По цене: от дорогих</option>
                             <option value="name" {% if sort_by == 'name' %}selected{% endif %}>По названию</option>
+                            <option value="discount" {% if sort_by == 'discount' %}selected{% endif %}>По скидке</option>
                         </select>
                     </form>
                 </div>
@@ -75,13 +76,18 @@
                         <div class="product-info">
                             <h3 class="product-name">{{ product.name }}</h3>
                             {% if product.discounted_price %}
-                            <p class="product-price product-price--discount">
+                            <div class="product-price product-price--discount">
                                 <span class="product-price__old">{{ product.price|floatformat:0 }} ₽</span>
-                                <span class="product-price__new">{{ product.discounted_price|floatformat:0 }} ₽</span>
-                                <span class="product-price__badge">-{{ product.discount }}%</span>
-                            </p>
+                                <div class="product-price__discount-row">
+                                    <span class="product-price__new">{{ product.discounted_price|floatformat:0 }} ₽</span>
+                                    <span class="product-price__badge">-{{ product.discount }}%</span>
+                                </div>
+                            </div>
                             {% else %}
                             <p class="product-price">{{ product.price|floatformat:0 }} ₽</p>
+                            {% endif %}
+                            {% if product.price_from %}
+                            <p class="product-price-from">от {{ product.price_from|floatformat:0 }} ₽</p>
                             {% endif %}
                             <div class="product-details-hover">
                                 {% if product.country %}

@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.core.mail import EmailMessage
+from django.conf import settings
 from .models import Category, Product, SubCategory, FilterCategory, FilterValue, ProductRating
 
 
@@ -52,6 +54,11 @@ def category_detail(request, slug):
             Q(materials__icontains=search_query)
         )
     
+    # Фильтр по скидке
+    discount_filter = request.GET.get('discount_only')
+    if discount_filter:
+        products = products.filter(discount__gt=0)
+
     # Сортировка
     sort_by = request.GET.get('sort', '-created_at')
     if sort_by == 'price_asc':
@@ -60,11 +67,13 @@ def category_detail(request, slug):
         products = products.order_by('-price')
     elif sort_by == 'name':
         products = products.order_by('name')
+    elif sort_by == 'discount':
+        products = products.filter(discount__gt=0).order_by('-discount')
     elif sort_by == 'availability':
         products = products.order_by('-created_at')  # Временно сортируем по дате
     else:  # -created_at
         products = products.order_by('-created_at')
-    
+
     # Подсчет товаров по категориям фильтров (для текущей выборки)
     # Используем базовую выборку с учетом подкатегории
     base_products = Product.objects.filter(category=category)
@@ -108,6 +117,7 @@ def category_detail(request, slug):
         'sort_by': sort_by,
         'subcategories': subcategories,
         'selected_subcategory': subcategory_slug,
+        'discount_filter': discount_filter,
     }
     return render(request, 'catalog/category_detail.html', context)
 
@@ -129,7 +139,11 @@ def subcategory_detail(request, category_slug, subcategory_slug):
     availability = request.GET.get('availability')
     if availability:
         products = products.filter(availability=availability)
-    
+
+    discount_filter = request.GET.get('discount_only')
+    if discount_filter:
+        products = products.filter(discount__gt=0)
+
     sort_by = request.GET.get('sort', '-created_at')
     if sort_by == 'price_asc':
         products = products.order_by('price')
@@ -137,11 +151,13 @@ def subcategory_detail(request, category_slug, subcategory_slug):
         products = products.order_by('-price')
     elif sort_by == 'name':
         products = products.order_by('name')
+    elif sort_by == 'discount':
+        products = products.filter(discount__gt=0).order_by('-discount')
     elif sort_by == 'availability':
-        products = products.order_by('-created_at')  # Временно сортируем по дате
+        products = products.order_by('-created_at')
     else:  # -created_at
         products = products.order_by('-created_at')
-    
+
     context = {
         'category': category,
         'subcategory': subcategory,
@@ -150,6 +166,7 @@ def subcategory_detail(request, category_slug, subcategory_slug):
         'current_filters': filter_params,
         'availability_filter': availability,
         'sort_by': sort_by,
+        'discount_filter': discount_filter,
     }
     return render(request, 'catalog/subcategory_detail.html', context)
 
@@ -196,6 +213,42 @@ def product_detail(request, slug):
         'stores_in_stock': stores_in_stock,
     }
     return render(request, 'catalog/product_detail.html', context)
+
+
+@require_POST
+def form_demo(request):
+    """Обработка заявки — уточнить о товаре"""
+    fio = request.POST.get('fio', '').strip()
+    telephone = request.POST.get('telephone', '').strip()
+    product_name = request.POST.get('product_name', '').strip()
+    product_url = request.POST.get('product_url', '').strip()
+
+    if not fio or not telephone:
+        return JsonResponse({'status': 'failed', 'message': 'Пожалуйста, заполните все поля.'})
+
+    subject = f'Уточнить о товаре: {product_name}' if product_name else 'Уточнить о товаре'
+    message = f"""Новый запрос «Уточнить о товаре»
+
+ФИО: {fio}
+Телефон: {telephone}
+"""
+    if product_name:
+        message += f"Товар: {product_name}\n"
+    if product_url:
+        message += f"Ссылка: {product_url}\n"
+
+    try:
+        email = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=['store@cascate.ru'],
+        )
+        email.send(fail_silently=False)
+    except Exception as e:
+        print(f"[ERROR] form_demo email failed: {e}")
+
+    return JsonResponse({'status': 'ok'})
 
 
 @require_POST
